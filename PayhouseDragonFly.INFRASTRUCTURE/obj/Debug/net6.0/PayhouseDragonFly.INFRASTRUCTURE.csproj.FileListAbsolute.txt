@@ -1,0 +1,17 @@
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\bin\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.deps.json
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\bin\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.dll
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\bin\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.pdb
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\bin\Debug\net6.0\PayhouseDragonFly.CORE.dll
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\bin\Debug\net6.0\PayhouseDragonFly.CORE.pdb
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\obj\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.csproj.AssemblyReference.cache
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\obj\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.GeneratedMSBuildEditorConfig.editorconfig
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\obj\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.AssemblyInfoInputs.cache
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\obj\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.AssemblyInfo.cs
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\obj\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.csproj.CoreCompileInputs.cache
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\obj\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.csproj.CopyComplete
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\obj\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.dll
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\obj\Debug\net6.0\refint\PayhouseDragonFly.INFRASTRUCTURE.dll
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\obj\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.pdb
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\obj\Debug\net6.0\ref\PayhouseDragonFly.INFRASTRUCTURE.dll
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\bin\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.runtimeconfig.json
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.INFRASTRUCTURE\obj\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.genruntimeconfig.cache

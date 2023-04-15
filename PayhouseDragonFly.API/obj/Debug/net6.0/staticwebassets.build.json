@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "FxB43nGm8IGwMHZwdlgoadsnvSGDLIwRSzRIrdaE4xw=",
+  "Source": "PayhouseDragonFly.API",
+  "BasePath": "_content/PayhouseDragonFly.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

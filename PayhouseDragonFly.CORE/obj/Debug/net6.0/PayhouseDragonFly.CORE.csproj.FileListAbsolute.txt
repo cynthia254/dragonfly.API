@@ -1,0 +1,12 @@
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\bin\Debug\net6.0\PayhouseDragonFly.CORE.deps.json
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\bin\Debug\net6.0\PayhouseDragonFly.CORE.dll
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\bin\Debug\net6.0\PayhouseDragonFly.CORE.pdb
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.csproj.AssemblyReference.cache
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.GeneratedMSBuildEditorConfig.editorconfig
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.AssemblyInfoInputs.cache
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.AssemblyInfo.cs
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.csproj.CoreCompileInputs.cache
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.dll
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\refint\PayhouseDragonFly.CORE.dll
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.pdb
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\ref\PayhouseDragonFly.CORE.dll

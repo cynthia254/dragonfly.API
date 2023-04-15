@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\PayhouseDragonFly.API.props" />
+</Project>
