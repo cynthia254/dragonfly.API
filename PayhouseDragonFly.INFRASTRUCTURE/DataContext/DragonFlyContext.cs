@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using PayhouseDragonFly.CORE.Models.NewFolder.TicketRegistration;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.DataContext
                 entity.ToTable(name: "PayhouseDragonFlyUsers");
             });
         }
+        public DbSet<PayhouseDragonFlyUsers> PayhouseDragonFlyUsers { get; set; }
+
+        public DbSet<Tickets>  Tickets { get; set; }    
 
 
 

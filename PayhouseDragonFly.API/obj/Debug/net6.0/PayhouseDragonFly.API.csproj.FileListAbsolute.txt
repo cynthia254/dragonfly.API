@@ -93,3 +93,4 @@ D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\Payhou
 D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.dll
 D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\PayhouseDragonFly.CORE.pdb
 D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\PayhouseDragonFly.INFRASTRUCTURE.pdb
+D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

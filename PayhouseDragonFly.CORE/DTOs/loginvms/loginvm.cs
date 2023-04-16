@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace PayhouseDragonFly.CORE.DTOs.loginvms
 {
-    internal class loginvm
+    public class loginvm
     {
+        public string UserName { get; set; }
+        public string Password { get; set; }
     }
 }

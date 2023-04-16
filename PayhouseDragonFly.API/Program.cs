@@ -1,10 +1,18 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.ITicketServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUserServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.TicketService;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices;
 using System.Configuration;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +44,7 @@ builder.Services.AddSwaggerGen(c =>
                                 {
                                     Type = ReferenceType.SecurityScheme,
                                     Id = "Bearer"
-                                }
+                               }
                             },
                             new string[] { }
                         }
@@ -44,6 +52,9 @@ builder.Services.AddSwaggerGen(c =>
     );
     ;
 });
+builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddScoped<ITicketServices, TicketService>();
+builder.Services.AddScoped<IEExtraServices, ExtraServices>();
 builder.Services
     .AddAuthentication(opt =>
     {
@@ -58,7 +69,7 @@ builder.Services
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.ASCII.GetBytes(Constants.JWT_SECURITY_KEY)
+                Encoding.ASCII.GetBytes(PayhouseDragonFly.CORE.ConnectorClasses.TokenConstants.Constants.JWT_SECURITY_KEY)
             ),
             ValidateIssuer = false,
             ValidateAudience = false
@@ -68,11 +79,15 @@ builder.Services
 builder.Services.AddDbContext<DragonFlyContext>(
     x => x.UseSqlServer(builder.Configuration.GetConnectionString("DevConnectiions"))
 );
+builder.Services.AddCors(confg =>
+  confg.AddPolicy("AllowAll",
+    p => p.AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader()));
 // Add services to the container.
 builder.Services.AddIdentity<PayhouseDragonFlyUsers, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                     .AddEntityFrameworkStores<DragonFlyContext>()
                     .AddRoles<IdentityRole>();
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -86,7 +101,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
