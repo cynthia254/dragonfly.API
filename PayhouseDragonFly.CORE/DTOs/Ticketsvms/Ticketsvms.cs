@@ -8,17 +8,20 @@ namespace PayhouseDragonFly.CORE.DTOs.Ticketsvms
 {
     public class Ticketsvms
     {
-        public string TicketTitle { get; set; }
-        public string TicketDescriptiom { get; set; }
-        public string TicketType { get; set; }
+        public string ServiceName { get; set; }
+        public string itemName { get; set; }
+        public string siteArea { get; set; }
+        public string clientLocation { get; set; }
+        public string description { get; set; }
+        public string subject { get; set; }
+        public string priorityName { get; set; }
+        
+        public string ServiceIssue { get; set; }
+
+        public string ClientName { get; set; }
       
-        public DateTime DateCreated { get; set; } = DateTime.Now;
-        public DateTime DateUpdated { get; set; }
-        public string Priority { get; set; }
-        public string Status { get; set; }
-        public string AssignedTo { get; set; }
-        public string AssignedFrom { get; set; }
-        public DateTime DueDate { get; set; }
-        public DateTime ClosedDate { get; set; }
+
+
+
     }
 }

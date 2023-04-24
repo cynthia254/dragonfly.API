@@ -51,8 +51,8 @@ namespace PayhouseDragonFly.API.Controllers.User
         }
 
 
-        [Authorize]
-        [HttpGet]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
         [Route("DeleteUsers")]
         public async Task<BaseResponse> DeleteUser(string usermail)
         {
@@ -80,6 +80,22 @@ namespace PayhouseDragonFly.API.Controllers.User
             return await _userServices.GetUserByEmail(useremail);   
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("Edituseremail")]
+        public async Task<BaseResponse> EditUserEmail(string newemail)
+        {
+
+            return await _userServices.EditUserEmail(newemail);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("getuserbyid")]
+        public async Task<BaseResponse> GetUserById(string userId)
+        {
+            return await _userServices.GetUserById(userId);
+
+        }
 
 
     }

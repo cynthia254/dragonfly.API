@@ -7,7 +7,8 @@ using Microsoft.OpenApi.Models;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices;
-using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.ITicketServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IticketsCoreServices;
+
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUserServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.TicketService;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices;
@@ -53,7 +54,7 @@ builder.Services.AddSwaggerGen(c =>
     ;
 });
 builder.Services.AddScoped<IUserServices, UserServices>();
-builder.Services.AddScoped<ITicketServices, TicketService>();
+builder.Services.AddScoped<IticketsCoreServices, TicketService>();
 builder.Services.AddScoped<IEExtraServices, ExtraServices>();
 builder.Services
     .AddAuthentication(opt =>
@@ -76,14 +77,20 @@ builder.Services
         };
     });
 
+
 builder.Services.AddDbContext<DragonFlyContext>(
     x => x.UseSqlServer(builder.Configuration.GetConnectionString("DevConnectiions"))
 );
-builder.Services.AddCors(confg =>
-  confg.AddPolicy("AllowAll",
-    p => p.AllowAnyOrigin()
-    .AllowAnyMethod()
-    .AllowAnyHeader()));
+var devCorsPolicy = "devCorsPolicy";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(devCorsPolicy, builder =>
+    {
+        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+
+    });
+
+});
 // Add services to the container.
 builder.Services.AddIdentity<PayhouseDragonFlyUsers, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                     .AddEntityFrameworkStores<DragonFlyContext>()
@@ -94,15 +101,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
+app.UseCors(devCorsPolicy);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

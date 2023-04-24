@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
-using PayhouseDragonFly.INFRASTRUCTURE.Migrations;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;

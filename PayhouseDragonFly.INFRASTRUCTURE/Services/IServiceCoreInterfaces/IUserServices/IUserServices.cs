@@ -23,5 +23,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUser
         Task<BaseResponse> ConfirmUserAccount(string useremail);
 
         Task<BaseResponse> GetUserByEmail(string useremail);
+        Task<BaseResponse> EditUserEmail(string newemail);
+        Task<BaseResponse> GetUserById(string userId);
+
+        Task<BaseResponse> getAllUsers();
     }
 }

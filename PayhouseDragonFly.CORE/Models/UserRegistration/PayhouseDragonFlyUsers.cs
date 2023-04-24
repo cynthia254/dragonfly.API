@@ -11,7 +11,9 @@ namespace PayhouseDragonFly.CORE.Models.UserRegistration
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        
+        public string Salutation { get; set; }
+        public string AdditionalInformation { get; set; }
+        public string BusinessUnit { get; set; }
         public string Site { get; set; }
         public string County { get; set; }
         public string DepartmentName { get; set; }
@@ -23,5 +25,7 @@ namespace PayhouseDragonFly.CORE.Models.UserRegistration
         public string AnyMessage { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public int RoleId { get; set; }
+
+        public string Position { get; set; }
     }
 }

@@ -24,5 +24,9 @@ namespace PayhouseDragonFly.CORE.Models.Tickets
         public string AssignedFrom { get; set; }
         public DateTime DueDate { get; set; }
         public DateTime ClosedDate { get; set; }
+        public string Resolution { get; set; }
+        public string Escalation { get; set; }
+  
+
     }
 }

@@ -12,6 +12,7 @@ using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUserServices;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly DragonFlyContext _authDbContext;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IEExtraServices _extraservices;
         public UserServices(
 
          UserManager<PayhouseDragonFlyUsers> userManager,
@@ -42,6 +44,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
          ILogger<UserServices> logger,
          IHttpContextAccessor httpContextAccessor,
          DragonFlyContext authDbContext,
+         IEExtraServices extraservices,
          IServiceScopeFactory scopeFactory
             )
         {
@@ -52,15 +55,61 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
             _httpContextAccessor = httpContextAccessor;
             _authDbContext = authDbContext;
             _scopeFactory = scopeFactory;
+            _extraservices = extraservices;
 
         }
 
 
         public async Task<RegisterResponse> RegisterUser(RegisterVms rv)
         {
-
             try
             {
+                if (rv.FirstName == "")
+                {
+                    return new RegisterResponse("150", "First Name cannot be empty",null);
+                }
+                if (rv.LastName == "")
+                {
+                    return new RegisterResponse("150", "Last Name cannot be empty", null);
+                }
+                if (rv.DepartmentName == "")
+                {
+                    return new RegisterResponse("150", "Department Name cannot be empty", null);
+
+                }
+                if (rv.Position == "")
+                {
+                    return new RegisterResponse("150", "Position cannot be empty", null);
+
+                }
+
+
+                if (rv.BusinessUnit == "")
+                {
+                    return new RegisterResponse("150", "Business Unit cannot be empty", null);
+                }
+
+                if (rv.Address == "")
+                {
+
+                    return new RegisterResponse("150", "Location cannot be empty", null);
+                }
+                if (rv.AdditionalInformation == "")
+                {
+                    return new RegisterResponse("150", "User Type cannot be empty", null);
+                }
+                if (rv.PhoneNumber == "")
+                {
+                    return new RegisterResponse("150", "Phone Number cannot be empty", null);
+                }
+                if (rv.Email == "")
+                {
+                    return new RegisterResponse("150", "Email cannot be empty", null);
+                }
+                if (rv.Password == "")
+                {
+                    return new RegisterResponse("150", "Password cannot be empty", null);
+                }
 
                 using (var scope = _scopeFactory.CreateScope())
                 {
@@ -70,7 +119,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     {
                         FirstName = rv.FirstName,
                         LastName = rv.LastName,
-                        ClientName = rv.ClientName,
+                        ClientName=rv.DepartmentName,
                         UserName = rv.Email,
                         DepartmentName = rv.DepartmentName,
                         PasswordHash = rv.Password,
@@ -78,9 +127,16 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         PhoneNumber = rv.PhoneNumber,
                         Address = rv.Address,
                         Site = rv.Site,
-                        County = rv.County,
                         VerificationToken = "fbndvdhhhdhd",
-                        NormalizedEmail = rv.Email
+                        NormalizedEmail = rv.Email,
+                        AnyMessage="SUCCESSFUL",
+                        Position = rv.Position,
+                        BusinessUnit=rv.BusinessUnit,
+                        AdditionalInformation=rv.AdditionalInformation,
+                        Salutation= rv.Salutation,
+                        County="Any"
+                        
+
                     };
 
                     var response = await _userManager.CreateAsync(newuser, rv.Password);
@@ -114,26 +170,26 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     if (loggedinuser.UserName == "")
                     {
                         return
-                        new authenticationResponses("140", "Email cant be empty", "", "");
+                        new authenticationResponses("140", "Email cant be empty", "", "", "", "");
 
 
                     }
                     if (loggedinuser.Password == "")
                     {
                         return
-                        new authenticationResponses("150", "Password cant be empty", "", "");
+                        new authenticationResponses("150", "Password cant be empty", "", "", "", "");
 
                     }
                     var identityUser = await _userManager.FindByEmailAsync(loggedinuser.UserName);
                     if (identityUser == null)
                     {
                         return
-                         new authenticationResponses("120", "user not found", "", "");
+                         new authenticationResponses("120", "user not found", "", "", "", "");
                     }
 
                     if (!identityUser.EmailConfirmed)
                     {
-                        return new authenticationResponses("110", "Kindly authenticate account first", "", "");
+                        return new authenticationResponses("110", "Kindly authenticate account first", "", "", "", "");
                     }
                     if (identityUser != null)
                     {
@@ -147,7 +203,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         if (result == PasswordVerificationResult.Failed)
                         {
                             return
-                         new authenticationResponses("114", "Please use the correct password", "", "");
+                         new authenticationResponses("114", "Please use the correct password", "", "", "", "");
                         }
 
 
@@ -183,9 +239,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         var securitytoken =
                             jwtsecuritytokenhandler.CreateToken(securitytokendescripor);
                         var token = jwtsecuritytokenhandler.WriteToken(securitytoken);
-                        return new authenticationResponses("200", "Successfully logged in", token, loggedinuser.UserName);
+                        return new authenticationResponses("200", "Successfully logged in",
+                            token, loggedinuser.UserName,identityUser.FirstName, identityUser.LastName);
                     }
-                    return new authenticationResponses("", "", "", "");
+                    return new authenticationResponses("", "", "", "","","");
 
                 }
             }
@@ -193,7 +250,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
             catch (Exception e)
             {
                 _logger.LogInformation("Error message on login : ", e.Message);
-                return new authenticationResponses("190", e.Message, "", "");
+                return new authenticationResponses("190", e.Message, "", "", "","");
             }
         }
 
@@ -205,7 +262,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 {
                     var scopedcontent = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
 
-                    var allusers = await scopedcontent.PayhouseDragonFlyUsers.ToListAsync();
+                    var allusers = await scopedcontent.PayhouseDragonFlyUsers.OrderByDescending(x=>x.DateCreated).ToListAsync();
 
                     if (allusers == null)
                     {
@@ -225,7 +282,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
         {
             try
             {
-              
+
 
                 var userexists = await _userManager.FindByEmailAsync(usermail);
 
@@ -236,7 +293,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 }
 
 
-                var response= await _userManager.DeleteAsync(userexists);
+                var response = await _userManager.DeleteAsync(userexists);
 
                 if (!response.Succeeded)
                 {
@@ -252,7 +309,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
             }
 
         }
-        public async Task<BaseResponse>  ConfirmUserAccount(string useremail)
+        public async Task<BaseResponse> ConfirmUserAccount(string useremail)
         {
 
             try
@@ -263,16 +320,16 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     var scopedcontent = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
 
 
-                   var userexists=await _userManager.FindByEmailAsync(useremail);
+                    var userexists = await _userManager.FindByEmailAsync(useremail);
 
                     if (userexists == null)
                     {
-                        return new BaseResponse("009","User does not exist", null);
+                        return new BaseResponse("009", "User does not exist", null);
                     }
                     userexists.EmailConfirmed = true;
 
-                  var response= await _userManager.UpdateAsync(userexists);
-                    if(response.Succeeded)
+                    var response = await _userManager.UpdateAsync(userexists);
+                    if (response.Succeeded)
                     {
                         return new BaseResponse("200", "User account confirmed successfully", null);
                     }
@@ -290,7 +347,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
         {
             var userexists = await _userManager.FindByEmailAsync(useremail);
 
-            if(userexists==null)
+            if (userexists == null)
             {
                 return new BaseResponse("1800", "User not found", null);
             }
@@ -298,7 +355,54 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
             return new BaseResponse("200", "Queried successfully", userexists);
         }
 
-    }
+
+
+        public async Task<BaseResponse> EditUserEmail(string newemail)
+        {
+
+            var loggedinuser = await _extraservices.LoggedInUser();
+
+
+            if (loggedinuser == null)
+            {
+
+                return new BaseResponse("92", "user not logged in", null);
+            }
+
+            loggedinuser.Email = newemail;
+            loggedinuser.UserName= newemail;
+            loggedinuser.NormalizedEmail= newemail;
+
+            await _userManager.UpdateAsync(loggedinuser);
+            return new BaseResponse("200", "Email  changed successfully ", loggedinuser);
+
+
+        }
+        public async Task<BaseResponse> GetUserById(string userId)
+        {
+           // var user = await _authDbContext.Tickets.Where(x =>x.Id==userId).FirstOrDefaultAsync();
+           var userexists= _userManager.FindByIdAsync(userId);
+
+            if (userexists == null)
+            {
+
+                return new BaseResponse("120", "user not available", null);
+            }
+
+            return new BaseResponse("200", "Queried succesfully", userexists);
+
+        }
+
+
+        public async Task<BaseResponse> getAllUsers()
+        {
+            var allusers = await _authDbContext.PayhouseDragonFlyUsers.ToListAsync();
+
+            return new BaseResponse("200", "queried successfully", allusers);
+        }
+    
+
+}
 }
 
 

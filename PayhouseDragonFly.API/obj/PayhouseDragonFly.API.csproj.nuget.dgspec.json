@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.API\\PayhouseDragonFly.API.csproj": {}
+    "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.API\\PayhouseDragonFly.API.csproj": {}
   },
   "projects": {
-    "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.API\\PayhouseDragonFly.API.csproj": {
+    "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.API\\PayhouseDragonFly.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.API\\PayhouseDragonFly.API.csproj",
+        "projectUniqueName": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.API\\PayhouseDragonFly.API.csproj",
         "projectName": "PayhouseDragonFly.API",
-        "projectPath": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.API\\PayhouseDragonFly.API.csproj",
-        "packagesPath": "C:\\Users\\brian.otieno.SLAFRICA\\.nuget\\packages\\",
-        "outputPath": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.API\\obj\\",
+        "projectPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.API\\PayhouseDragonFly.API.csproj",
+        "packagesPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.API\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\brian.otieno.SLAFRICA\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\user.DESKTOP-OMQ89VA\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -26,17 +22,18 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj": {
-                "projectPath": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj"
+              "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj": {
+                "projectPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj"
               },
-              "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\PayhouseDragonFly.INFRASTRUCTURE.csproj": {
-                "projectPath": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\PayhouseDragonFly.INFRASTRUCTURE.csproj"
+              "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\PayhouseDragonFly.INFRASTRUCTURE.csproj": {
+                "projectPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\PayhouseDragonFly.INFRASTRUCTURE.csproj"
               }
             }
           }
@@ -103,25 +100,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj": {
+    "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj",
+        "projectUniqueName": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj",
         "projectName": "PayhouseDragonFly.CORE",
-        "projectPath": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj",
-        "packagesPath": "C:\\Users\\brian.otieno.SLAFRICA\\.nuget\\packages\\",
-        "outputPath": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\obj\\",
+        "projectPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj",
+        "packagesPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\brian.otieno.SLAFRICA\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\user.DESKTOP-OMQ89VA\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -129,6 +122,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -168,25 +162,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\PayhouseDragonFly.INFRASTRUCTURE.csproj": {
+    "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\PayhouseDragonFly.INFRASTRUCTURE.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\PayhouseDragonFly.INFRASTRUCTURE.csproj",
+        "projectUniqueName": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\PayhouseDragonFly.INFRASTRUCTURE.csproj",
         "projectName": "PayhouseDragonFly.INFRASTRUCTURE",
-        "projectPath": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\PayhouseDragonFly.INFRASTRUCTURE.csproj",
-        "packagesPath": "C:\\Users\\brian.otieno.SLAFRICA\\.nuget\\packages\\",
-        "outputPath": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\obj\\",
+        "projectPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\PayhouseDragonFly.INFRASTRUCTURE.csproj",
+        "packagesPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.INFRASTRUCTURE\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\brian.otieno.SLAFRICA\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\user.DESKTOP-OMQ89VA\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -194,14 +184,15 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj": {
-                "projectPath": "D:\\SupportFolder\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj"
+              "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj": {
+                "projectPath": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj"
               }
             }
           }
@@ -265,7 +256,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
         }
       }
     }

@@ -10,3 +10,15 @@ D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\Payho
 D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\refint\PayhouseDragonFly.CORE.dll
 D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.pdb
 D:\SupportFolder\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\ref\PayhouseDragonFly.CORE.dll
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\bin\Debug\net6.0\PayhouseDragonFly.CORE.deps.json
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\bin\Debug\net6.0\PayhouseDragonFly.CORE.dll
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\bin\Debug\net6.0\PayhouseDragonFly.CORE.pdb
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.csproj.AssemblyReference.cache
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.AssemblyInfoInputs.cache
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.AssemblyInfo.cs
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.csproj.CoreCompileInputs.cache
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.dll
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\refint\PayhouseDragonFly.CORE.dll
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\PayhouseDragonFly.CORE.pdb
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.CORE\obj\Debug\net6.0\ref\PayhouseDragonFly.CORE.dll
