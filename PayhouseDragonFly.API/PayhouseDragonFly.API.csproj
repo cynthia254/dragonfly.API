@@ -27,4 +27,8 @@
     <ProjectReference Include="..\PayhouseDragonFly.INFRASTRUCTURE\PayhouseDragonFly.INFRASTRUCTURE.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\Roles\" />
+  </ItemGroup>
+
 </Project>

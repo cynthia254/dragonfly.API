@@ -16,14 +16,14 @@ namespace PayhouseDragonFly.API.Controllers.User
 
     public class UserController : ControllerBase
     {
-        private readonly IUserServices _userServices;   
-        public UserController(IUserServices userServices   )
+        private readonly IUserServices _userServices;
+        public UserController(IUserServices userServices)
         {
-            _userServices= userServices;
+            _userServices = userServices;
         }
 
 
-        
+
         [HttpPost]
         [Route("Authenticate")]
         public async Task<authenticationResponses> Authenticate(loginvm loggedinuser)
@@ -32,22 +32,22 @@ namespace PayhouseDragonFly.API.Controllers.User
             return await _userServices.Authenticate(loggedinuser);
 
         }
-  
+
         [HttpPost]
         [Route("Register_User")]
-        public async    Task<RegisterResponse> RegisterUser(RegisterVms rv)
+        public async Task<RegisterResponse> RegisterUser(RegisterVms rv)
         {
-            return await  _userServices.RegisterUser(rv);
+            return await _userServices.RegisterUser(rv);
 
         }
-        [Authorize(AuthenticationSchemes ="Bearer")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("GetAllUsers")]
-      
+
         public async Task<BaseResponse> GetAllUsers()
         {
 
-            return await _userServices.GetAllUsers();   
+            return await _userServices.GetAllUsers();
         }
 
 
@@ -64,7 +64,7 @@ namespace PayhouseDragonFly.API.Controllers.User
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("ConfirmUserMail")]
-      
+
         public async Task<BaseResponse> ConfirmUserAccount(string useremail)
         {
 
@@ -77,7 +77,7 @@ namespace PayhouseDragonFly.API.Controllers.User
         public async Task<BaseResponse> GetUserByEmail(string useremail)
         {
 
-            return await _userServices.GetUserByEmail(useremail);   
+            return await _userServices.GetUserByEmail(useremail);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -97,6 +97,18 @@ namespace PayhouseDragonFly.API.Controllers.User
 
         }
 
+        [HttpPost]
+        [Route("Add_Department")]
+        public async Task<BaseResponse> AddDepartment(AddDepartmentvms addDepartmentvms)
+        {
+            return await _userServices.AddDepartment(addDepartmentvms);
+
+        }
+
 
     }
-}
+
+
+
+    }
+

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.DTOs;
@@ -6,7 +7,6 @@ using PayhouseDragonFly.CORE.DTOs.escalate;
 using PayhouseDragonFly.CORE.DTOs.resolve;
 using PayhouseDragonFly.CORE.DTOs.Ticketsvms;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IticketsCoreServices;
-
 using System.Reflection.Metadata.Ecma335;
 
 namespace PayhouseDragonFly.API.Controllers.Tickets
@@ -37,6 +37,7 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
         {
 
             return await _ticketServices.GetAllTickets();
+
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]

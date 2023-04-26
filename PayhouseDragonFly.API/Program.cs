@@ -7,9 +7,11 @@ using Microsoft.OpenApi.Models;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IRoleServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IticketsCoreServices;
 
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUserServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.RoleServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.TicketService;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices;
 using System.Configuration;
@@ -56,6 +58,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IticketsCoreServices, TicketService>();
 builder.Services.AddScoped<IEExtraServices, ExtraServices>();
+builder.Services.AddScoped<IRolesServices, RoleService>();
 builder.Services
     .AddAuthentication(opt =>
     {

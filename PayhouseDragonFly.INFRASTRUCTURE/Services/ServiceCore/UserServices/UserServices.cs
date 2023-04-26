@@ -5,11 +5,13 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using PayhouseDragonFly.API.Controllers.User;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
+using PayhouseDragonFly.CORE.Models.departments;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices;
@@ -18,10 +20,12 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 {
@@ -119,7 +123,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     {
                         FirstName = rv.FirstName,
                         LastName = rv.LastName,
-                        ClientName=rv.DepartmentName,
+                        ClientName = rv.DepartmentName,
                         UserName = rv.Email,
                         DepartmentName = rv.DepartmentName,
                         PasswordHash = rv.Password,
@@ -129,12 +133,16 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         Site = rv.Site,
                         VerificationToken = "fbndvdhhhdhd",
                         NormalizedEmail = rv.Email,
-                        AnyMessage="SUCCESSFUL",
+                        AnyMessage = "SUCCESSFUL",
                         Position = rv.Position,
-                        BusinessUnit=rv.BusinessUnit,
-                        AdditionalInformation=rv.AdditionalInformation,
-                        Salutation= rv.Salutation,
-                        County="Any"
+                        BusinessUnit = rv.BusinessUnit,
+                        AdditionalInformation = rv.AdditionalInformation,
+                        Salutation = rv.Salutation,
+                        County = "Any",
+                        
+                        
+                        
+                      
                         
 
                     };
@@ -392,6 +400,50 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
             return new BaseResponse("200", "Queried succesfully", userexists);
 
         }
+        public async Task<BaseResponse> AddDepartment(AddDepartmentvms addDepartmentvms)
+        {
+            try
+            {
+                if (addDepartmentvms.DepartmentName == "")
+                {
+                    return new BaseResponse("150", "Department Name cannot be empty", null);
+                }
+                if (addDepartmentvms.DepartmentDescription == "")
+                {
+                    return new BaseResponse("150", "Department Description cannot be empty", null);
+                }
+
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var newDepartment = new Departments
+                    {
+                        
+                        DepartmentDescription = addDepartmentvms.DepartmentDescription,
+                        DepartmentName = addDepartmentvms.DepartmentName,
+
+
+                    };
+                  
+                    var response = await scopedcontext.AddAsync(newDepartment);
+                    await scopedcontext.SaveChangesAsync();
+                    return new BaseResponse("200", "Department created successfully ", newDepartment);
+
+
+
+                }
+
+
+            }
+            catch(Exception ex)
+            {
+                return new BaseResponse("150", ex.Message, null);
+            }
+           
+
+
+
+      }
 
 
         public async Task<BaseResponse> getAllUsers()
@@ -400,9 +452,11 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
             return new BaseResponse("200", "queried successfully", allusers);
         }
-    
 
-}
+      
+
+
+    }
 }
 
 

@@ -273,6 +273,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DepartmentDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("DepartmentName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -358,6 +362,27 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("PayhouseDragonFlyUsers", (string)null);
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.departments.Departments", b =>
+                {
+                    b.Property<int>("Departnmentid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Departnmentid"));
+
+                    b.Property<string>("DepartmentDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DepartmentName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Departnmentid");
+
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
