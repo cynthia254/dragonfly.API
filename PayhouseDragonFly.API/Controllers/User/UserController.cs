@@ -7,6 +7,7 @@ using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUserServ
 
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using Microsoft.AspNetCore.Authorization;
+using PayhouseDragonFly.CORE.DTOs.Roles;
 
 namespace PayhouseDragonFly.API.Controllers.User
 {
@@ -104,11 +105,32 @@ namespace PayhouseDragonFly.API.Controllers.User
             return await _userServices.AddDepartment(addDepartmentvms);
 
         }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet]
+        [Route("GetAllDepartment")]
+
+        public async Task<BaseResponse> GetAllDepartment()
+        {
+
+            return await _userServices.GetAllDepartment();
+        }
+
+
+        [HttpGet]
+        [Route("SendTestMail")]
+        public async Task<mailresponse> TestMail(string testmail)
+        {
+
+            return await _userServices.TestMail(testmail);
+        }
+
+
+
 
 
     }
 
 
 
-    }
+}
 

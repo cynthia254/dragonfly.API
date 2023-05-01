@@ -13,6 +13,7 @@ namespace PayhouseDragonFly.CORE.Models.departments
         public int Departnmentid { get; set; }
         public string DepartmentName { get; set; }
         public string DepartmentDescription { get; set; }
+       
 
     }
 }

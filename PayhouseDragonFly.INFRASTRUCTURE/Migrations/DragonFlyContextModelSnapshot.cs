@@ -155,6 +155,23 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Roles.RolesTable", b =>
+                {
+                    b.Property<int>("RolesID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RolesID"));
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RolesID");
+
+                    b.ToTable("RolesTable");
+                });
+
             modelBuilder.Entity("PayhouseDragonFly.CORE.Models.TicketRegistration.Tickets", b =>
                 {
                     b.Property<int>("Id")

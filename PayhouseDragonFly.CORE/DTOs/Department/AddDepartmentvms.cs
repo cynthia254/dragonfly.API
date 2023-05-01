@@ -10,5 +10,6 @@ namespace PayhouseDragonFly.API.Controllers.User
     {
         public string DepartmentName { get; set; }
         public string DepartmentDescription{ get; set; }
+        
     }
 }

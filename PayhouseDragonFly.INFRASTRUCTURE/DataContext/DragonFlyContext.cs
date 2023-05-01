@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PayhouseDragonFly.CORE.Models.departments;
+using PayhouseDragonFly.CORE.Models.Roles;
 using PayhouseDragonFly.CORE.Models.TicketRegistration;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using System;
@@ -29,9 +30,6 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.DataContext
 
         public DbSet<Tickets>  Tickets { get; set; }
         public DbSet<Departments> Departments { get; set; }
-
-
-
-
-    }
+        public DbSet<RolesTable>  RolesTable { get; set; }
+            }
 }

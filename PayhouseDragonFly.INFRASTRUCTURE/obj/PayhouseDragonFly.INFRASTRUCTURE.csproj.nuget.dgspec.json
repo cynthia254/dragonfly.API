@@ -107,6 +107,14 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "MailKit": {
+              "target": "Package",
+              "version": "[4.0.0, )"
+            },
+            "MailKit.NET": {
+              "target": "Package",
+              "version": "[2.0.0, )"
+            },
             "Microsoft.AspNetCore.Http.Abstractions": {
               "target": "Package",
               "version": "[2.2.0, )"
@@ -138,6 +146,18 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[7.0.5, )"
+            },
+            "MimeKit": {
+              "target": "Package",
+              "version": "[4.0.0, )"
+            },
+            "SendGrid.SmtpApi": {
+              "target": "Package",
+              "version": "[1.4.6, )"
+            },
+            "SmtpServer": {
+              "target": "Package",
+              "version": "[9.0.2, )"
             }
           },
           "imports": [

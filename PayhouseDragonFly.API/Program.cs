@@ -1,24 +1,25 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Org.BouncyCastle.Pkix;
+using PayhouseDragonFly.CORE.Models.Emails;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices;
-using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IRoleServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IEmailServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IticketsCoreServices;
 
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUserServices;
-using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.RoleServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.TicketService;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices;
-using System.Configuration;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc(
@@ -58,7 +59,8 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IticketsCoreServices, TicketService>();
 builder.Services.AddScoped<IEExtraServices, ExtraServices>();
-builder.Services.AddScoped<IRolesServices, RoleService>();
+builder.Services.AddScoped<IEmailServices, EmailServices>();
+builder.Services.AddScoped<IRoleServices, RoleServices>();
 builder.Services
     .AddAuthentication(opt =>
     {

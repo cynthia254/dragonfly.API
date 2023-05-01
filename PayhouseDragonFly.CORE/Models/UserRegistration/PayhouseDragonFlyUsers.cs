@@ -28,7 +28,9 @@ namespace PayhouseDragonFly.CORE.Models.UserRegistration
 
         public string Position { get; set; }
         public string DepartmentDescription { get; set; }
-       
+        
+
+
 
 
     }

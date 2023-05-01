@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -9,23 +8,19 @@ using PayhouseDragonFly.API.Controllers.User;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
+using PayhouseDragonFly.CORE.DTOs.EmaillDtos;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
 using PayhouseDragonFly.CORE.Models.departments;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IEmailServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUserServices;
-using System;
-using System.Collections.Generic;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 {
@@ -40,9 +35,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
         private readonly DragonFlyContext _authDbContext;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IEExtraServices _extraservices;
+        private readonly IEmailServices _emailServices;
         public UserServices(
-
-         UserManager<PayhouseDragonFlyUsers> userManager,
+          IEmailServices emailServices,
+        UserManager<PayhouseDragonFlyUsers> userManager,
          SignInManager<PayhouseDragonFlyUsers> signInManager,
          RoleManager<IdentityRole> roleManager,
          ILogger<UserServices> logger,
@@ -60,6 +56,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
             _authDbContext = authDbContext;
             _scopeFactory = scopeFactory;
             _extraservices = extraservices;
+            _emailServices= emailServices;
 
         }
 
@@ -139,17 +136,40 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         AdditionalInformation = rv.AdditionalInformation,
                         Salutation = rv.Salutation,
                         County = "Any",
+                        RoleId = 4,
                         
-                        
-                        
-                      
-                        
-
+                        DepartmentDescription="Any Description"
                     };
 
                     var response = await _userManager.CreateAsync(newuser, rv.Password);
+                    if (response.Succeeded)
+                    {
+                        var emailpayload = $"Hi there {rv.FirstName} {rv.LastName}, thank you for your" +
+                              $" registration to Payhouse Limited. Kindly contact the administrator for your account to be activated ";
 
-                    return new RegisterResponse("200", "Registered user successfully ", newuser);
+                        var emailbody = new emailbody
+                             {
+                                ToEmail = rv.Email,
+                                UserName = rv.FirstName + " " + rv.LastName,
+                            PayLoad = emailpayload
+                              };
+
+                     var   results=  await _emailServices.SendEmailOnRegistration(emailbody);
+
+                        if(results.IsSent)
+                        {
+
+                            return new RegisterResponse("200", "Registered user successfully ", newuser);
+                        }
+
+                        else
+                        {
+                            return new RegisterResponse("130", "User not registered successfully", null);
+                        }
+
+                       
+                    }
+                    return new RegisterResponse("120", "User not registered ", newuser);
 
 
                 }
@@ -445,6 +465,64 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
       }
 
+        public async Task<mailresponse> TestMail(string testmail) 
+        {
+            //start
+
+
+            try
+            {
+                var sendmailbody = new emailbody
+                {
+                    ToEmail = testmail,
+                    UserName = "Tester",
+                    PayLoad = "This is a test mail to confirm the email service is working " +
+                    "well "
+                };
+                var responsevalue = await _emailServices.SenTestMail(sendmailbody);
+                if (responsevalue.IsSent)
+                {
+                    return new mailresponse(true, "email sent successfully");
+                }
+                else
+                {
+
+                    return new mailresponse(false, "Email not sent");
+                }
+
+            }catch(Exception ex)
+            {
+
+                return new mailresponse(false, ex.Message);
+            }
+
+        }
+
+        public async Task<BaseResponse> GetAllDepartment()
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedcontent = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var alldepartment = await scopedcontent.Departments.ToListAsync();
+
+                    if (alldepartment == null)
+                    {
+                        return new BaseResponse("120", "No department found", null);
+                    }
+
+                    return new BaseResponse("200", "Queried successfully", alldepartment);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return new BaseResponse("190", ex.Message, ex.StackTrace);
+            }
+        }
+
 
         public async Task<BaseResponse> getAllUsers()
         {
@@ -452,12 +530,24 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
             return new BaseResponse("200", "queried successfully", allusers);
         }
+        public async Task<BaseResponse> getAllDepartment()
+        {
+            var alldepartment = await _authDbContext.Departments.ToListAsync();
+
+            return new BaseResponse("200", "queried successfully",alldepartment);
+        }
 
       
 
-
     }
 }
+
+
+
+
+
+
+  
 
 
 

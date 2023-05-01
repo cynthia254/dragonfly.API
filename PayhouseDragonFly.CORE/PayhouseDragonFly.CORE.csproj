@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="DTOs\NewFolder3\" />
+    <Folder Include="DTOs\NewFolder\" />
   </ItemGroup>
 
 </Project>

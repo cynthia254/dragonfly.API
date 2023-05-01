@@ -4,6 +4,7 @@ using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
+using PayhouseDragonFly.CORE.DTOs.Roles;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUserServices
 {
@@ -18,8 +19,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUser
         Task<BaseResponse> EditUserEmail(string newemail);
         Task<BaseResponse> GetUserById(string userId);
         Task<BaseResponse> AddDepartment(AddDepartmentvms addDepartmentvm);
-     
-
+        Task<BaseResponse> GetAllDepartment();
+        Task<BaseResponse> getAllDepartment();
+       
         Task<BaseResponse> getAllUsers();
+        Task<mailresponse> TestMail(string testmail);
     }
 }
