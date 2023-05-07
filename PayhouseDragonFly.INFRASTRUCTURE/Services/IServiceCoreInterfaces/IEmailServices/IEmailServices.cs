@@ -12,5 +12,6 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IEmai
     {
         Task<mailresponse> SenTestMail(emailbody emailvm);
         Task<mailresponse> SendEmailOnRegistration(emailbody emailvm);
+        Task<mailresponse> SendEmailOnLeaveCompletion(EmailbodyOnLeaveEnd emailvm);
     }
 }

@@ -6,8 +6,8 @@ using PayhouseDragonFly.CORE.DTOs;
 using PayhouseDragonFly.CORE.DTOs.escalate;
 using PayhouseDragonFly.CORE.DTOs.resolve;
 using PayhouseDragonFly.CORE.DTOs.Ticketsvms;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices.RoleChecker;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IticketsCoreServices;
-using System.Reflection.Metadata.Ecma335;
 
 namespace PayhouseDragonFly.API.Controllers.Tickets
 {
@@ -16,10 +16,12 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
     [ApiController]
     public class TicktesController : ControllerBase
     {
+        private readonly IRoleChecker _rolechecker;
         public readonly IticketsCoreServices _ticketServices;
-        public TicktesController(IticketsCoreServices ticketServices)
+        public TicktesController(IticketsCoreServices ticketServices, IRoleChecker rolechecker)
         {
             _ticketServices = ticketServices;
+            _rolechecker= rolechecker;
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -27,7 +29,16 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
         [Route("RegisterTicket")]
         public async Task<BaseResponse> AddTicket(Ticketsvms vm)
         {
-            return await _ticketServices.AddTicket(vm);
+            var roleidretured = _rolechecker.Returnedrole().Result;
+            if (roleidretured == 2 || roleidretured==1 || roleidretured==3)
+            {
+                return await _ticketServices.AddTicket(vm);
+            }
+            else
+            {
+
+                return new BaseResponse("120", "You have no permission access this", null);
+            }
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -35,8 +46,17 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
         [Route("GetAllTickets")]
         public async Task<BaseResponse> GetAllTickets()
         {
+            var roleidretured = _rolechecker.Returnedrole().Result;
+            if (roleidretured == 1)
+            {
+                return await _ticketServices.GetAllTickets();
 
-            return await _ticketServices.GetAllTickets();
+            }
+            else
+            {
+
+                return new BaseResponse("120", "You have no permission access this", null);
+            }
 
         }
 
@@ -45,7 +65,16 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
         [Route("EditTicketsStatus")]
         public async Task<BaseResponse> EditTicketStatus(string status, int ticketid)
         {
-            return await _ticketServices.EditTicketStatus(status, ticketid);
+            var roleidretured = _rolechecker.Returnedrole().Result;
+            if (roleidretured == 2 || roleidretured == 1 || roleidretured == 3)
+            {
+                return await _ticketServices.EditTicketStatus(status, ticketid);
+            }
+            else
+            {
+
+                return new BaseResponse("120", "You have no permission access this", null);
+            }
         }
 
 
@@ -64,7 +93,16 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
         [Route("Assigntickettouser")]
         public async Task<BaseResponse> AsignedUserToTicket(asignuservm assignvm)
         {
-            return await _ticketServices.AsignedUserToTicket(assignvm);
+            var roleidretured = _rolechecker.Returnedrole().Result;
+            if (roleidretured == 2 || roleidretured == 1 || roleidretured == 3)
+            {
+                return await _ticketServices.AsignedUserToTicket(assignvm);
+            }
+            else
+            {
+
+                return new BaseResponse("120", "You have no permission access this", null);
+            }
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]

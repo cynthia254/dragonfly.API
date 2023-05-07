@@ -4,7 +4,7 @@ using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
-using PayhouseDragonFly.CORE.DTOs.Roles;
+using PayhouseDragonFly.CORE.DTOs.userStatusvm;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUserServices
 {
@@ -20,9 +20,16 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUser
         Task<BaseResponse> GetUserById(string userId);
         Task<BaseResponse> AddDepartment(AddDepartmentvms addDepartmentvm);
         Task<BaseResponse> GetAllDepartment();
-        Task<BaseResponse> getAllDepartment();
-       
+        Task<BaseResponse> getAllDepartment();    
         Task<BaseResponse> getAllUsers();
         Task<mailresponse> TestMail(string testmail);
+        Task<BaseResponse> GetDepartmentByID(int departmentid);
+        Task<BaseResponse> SuspendUser(suspendUservm vm);
+        Task<BaseResponse> ChangeUserStatus(userStatusvm vm);
+        Task<BaseResponse> GetUserActiveStatusByid(string userid);
+        Task<BaseResponse> GetLoggedInUser();
+        Task<BaseResponse> EditUserDetails(RegisterVms edituservm, string userid);
+        Task EmailOnLeaveCompletion();
+        Task<BaseResponse> ActivateUser(string useremail);
     }
 }

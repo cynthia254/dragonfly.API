@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PayhouseDragonFly.CORE.Models.UserRegistration
 {
-    public  class PayhouseDragonFlyUsers:IdentityUser
+    public class PayhouseDragonFlyUsers : IdentityUser
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -28,7 +28,19 @@ namespace PayhouseDragonFly.CORE.Models.UserRegistration
 
         public string Position { get; set; }
         public string DepartmentDescription { get; set; }
+        public string UserStatus { get; set; }
+        public string StatusReason{get;set;}
+
+        public bool UserActive { get; set; }
         
+        public string? StatusDescription { get; set; }
+
+        public string? ReasonforStatus { get; set; }
+
+
+
+
+
 
 
 

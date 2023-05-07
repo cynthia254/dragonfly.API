@@ -9,14 +9,19 @@ using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IEmailServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IticketsCoreServices;
 
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUserServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.ExtraServices.LoggedIuserServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.TicketService;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices;
 using System.Text;
+using Quartz;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices.jobs;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices.RoleChecker;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
@@ -56,11 +61,30 @@ builder.Services.AddSwaggerGen(c =>
     );
     ;
 });
+
+//quartz jobs 
+
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionJobFactory();
+    var emailsentonleaveend = new JobKey("notifyuseronleaveend");
+    q.AddJob<notifyuseronleaveend>(z => z.WithIdentity(emailsentonleaveend));
+    q.AddTrigger(y => y.ForJob(emailsentonleaveend)
+    .WithIdentity("notifyuseronleaveend-trigger")
+    .WithCronSchedule("0/1 * * * * ?"));
+});
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+//end quartz jobs
+
+
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IticketsCoreServices, TicketService>();
 builder.Services.AddScoped<IEExtraServices, ExtraServices>();
 builder.Services.AddScoped<IEmailServices, EmailServices>();
 builder.Services.AddScoped<IRoleServices, RoleServices>();
+builder.Services.AddScoped<ILoggeinUserServices, LoggeinUserServices>();
+builder.Services.AddScoped<IRoleChecker,RoleChecker>();
 builder.Services
     .AddAuthentication(opt =>
     {

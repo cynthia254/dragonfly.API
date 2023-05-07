@@ -107,6 +107,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "Hosting.Extensions.Quartz": {
+              "target": "Package",
+              "version": "[1.1.1, )"
+            },
             "MailKit": {
               "target": "Package",
               "version": "[4.0.0, )"
@@ -150,6 +154,14 @@
             "MimeKit": {
               "target": "Package",
               "version": "[4.0.0, )"
+            },
+            "Quartz": {
+              "target": "Package",
+              "version": "[3.6.2, )"
+            },
+            "Quartz.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[3.6.2, )"
             },
             "SendGrid.SmtpApi": {
               "target": "Package",

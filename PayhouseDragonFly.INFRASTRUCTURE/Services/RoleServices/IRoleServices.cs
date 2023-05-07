@@ -12,5 +12,6 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
        Task<RolesResponse> CreateRole(string Rolename);
         Task<RolesResponse> AssignUserToRole(string useremail, int roleid);
         Task<RolesResponse> GetAllRoles();
+        Task<string> Roleschecker();
     }
 }

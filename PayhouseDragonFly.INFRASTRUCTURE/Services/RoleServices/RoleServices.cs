@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Identity.Client;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse;
 using PayhouseDragonFly.CORE.Models.Roles;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
 {
@@ -18,14 +13,16 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
     {
         private UserManager<PayhouseDragonFlyUsers> _userManager;
         private readonly UserManager<PayhouseDragonFlyUsers> _signinmanager;
-
+        
 
         private readonly DragonFlyContext _context;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly ILoggeinUserServices _loggedinuser;
         public RoleServices(DragonFlyContext context,
             IServiceScopeFactory scopeFactory,
             UserManager<PayhouseDragonFlyUsers> userManager,
-            UserManager<PayhouseDragonFlyUsers> signinmanager
+            UserManager<PayhouseDragonFlyUsers> signinmanager,
+            ILoggeinUserServices loggedinuser
 
             )
         {
@@ -33,9 +30,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
             _scopeFactory = scopeFactory;
             _userManager = userManager;
             _signinmanager = signinmanager;
-
-
-
+            _loggedinuser = loggedinuser;
         }
         public async Task<RolesResponse> CreateRole(string Rolename)
         {
@@ -55,10 +50,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
 
                     var roleexists = await scopedcontext.RolesTable.Where(x => x.RoleName == Rolename).FirstOrDefaultAsync();
 
-                    if(roleexists != null)
+                    if (roleexists != null)
                     {
-                       return new RolesResponse(false, $" Role  '{Rolename}' already exist, if  must add a similar role kindly change the " +
-                            $"latter cases from lower to upper and vice versa depending on the existing  role . The existsing role is '{roleexists}' with role id {roleexists.RolesID} ", null);
+                        return new RolesResponse(false, $" Role  '{Rolename}' already exist, if  must add a similar role kindly change the " +
+                             $"latter cases from lower to upper and vice versa depending on the existing  role . The existsing role is '{roleexists}' with role id {roleexists.RolesID} ", null);
                     }
                     var rolesclass = new RolesTable
                     {
@@ -69,8 +64,6 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
                     return new RolesResponse(true, $"Role '{Rolename}'  created successfully", null);
 
                 }
-
-
 
             }
             catch (Exception ex)
@@ -129,9 +122,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
                 return new RolesResponse(false, ex.Message, null);
 
             }
-
         }
-
         public async Task<RolesResponse> GetAllRoles()
         {
 
@@ -143,7 +134,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
                     var allroles = await scopedcontext.RolesTable.ToListAsync();
 
-                    if(allroles == null)
+                    if (allroles == null)
                     {
                         return new RolesResponse(false, "Roles don't exist", null);
                     }
@@ -156,5 +147,57 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
                 return new RolesResponse(false, ex.Message, null);
             }
         }
+
+        //role checker based on logged in user
+
+        public async Task<RolesResponse> RoleChecker()
+        {
+            try
+            {
+
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    //roles chacker
+
+                    return new RolesResponse(false, "not yet implemented , to bve done later", null);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new RolesResponse(false, ex.Message, null);
+
+
+
+            }
+        }
+        public async Task<string> Roleschecker()
+        {
+
+            var user = await _loggedinuser.LoggedInUser();
+            var roleexists = await _context.RolesTable.Where(x => x.RolesID == user.RoleId).FirstOrDefaultAsync();
+            if (roleexists.RoleName == "SuperAdmin")
+            {
+                return "SuperAdmin";
+            }
+
+            else if (roleexists.RoleName == "Admin")
+            {
+                return "Admin";
+            }
+            else if (roleexists.RoleName == "Partner")
+            {
+                return "Partner";
+            }
+
+            else if(roleexists.RoleName=="User")
+            {
+                return "User";
+            }
+            return "";
+        }
+
+      
+        
     }
 }

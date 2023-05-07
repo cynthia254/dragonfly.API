@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ITicketServices
+namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.ITicketServices
 {
     public interface ITicketServices
     {
