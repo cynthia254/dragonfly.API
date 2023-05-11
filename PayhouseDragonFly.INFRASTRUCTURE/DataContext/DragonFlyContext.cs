@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
 using PayhouseDragonFly.CORE.Models.departments;
+using PayhouseDragonFly.CORE.Models.Designation;
 using PayhouseDragonFly.CORE.Models.Roles;
 using PayhouseDragonFly.CORE.Models.statusTable;
 using PayhouseDragonFly.CORE.Models.TicketRegistration;
@@ -34,7 +35,11 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.DataContext
         public DbSet<Departments> Departments { get; set; }
         public DbSet<RolesTable>  RolesTable { get; set; }
         public DbSet<UserStatusTable> UserStatusTable { get; set; }
+        public DbSet<Designation> Designation { get; set; }
+        public DbSet<RoleClaimsTable> RoleClaimsTable { get; set; }
+
+        public  DbSet<Claim_Role_Map> Claim_Role_Map { get; set; }
 
 
-            }
+    }
 }

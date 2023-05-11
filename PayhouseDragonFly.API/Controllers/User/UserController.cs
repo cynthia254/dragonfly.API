@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
+using PayhouseDragonFly.CORE.DTOs.Designation;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
 using PayhouseDragonFly.CORE.DTOs.userStatusvm;
@@ -207,10 +208,10 @@ namespace PayhouseDragonFly.API.Controllers.User
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("EditUser")]
-        public async Task<BaseResponse> EditUserDetails(RegisterVms edituservm, string userid)
+        public async Task<BaseResponse> EditUserDetails(RegisterVms edituservm)
         {
 
-            return await _userServices.EditUserDetails(edituservm, userid);
+            return await _userServices.EditUserDetails(edituservm);
         }
 
 
@@ -222,6 +223,38 @@ namespace PayhouseDragonFly.API.Controllers.User
             return await _userServices.ActivateUser(useremail);
 
         }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("CreateDesignation")]
+        public async Task <BaseResponse>AddDesignation(AddDesignationvms addDesignationvms)
+        {
+            return await _userServices.AddDesignation(addDesignationvms);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet]
+        [Route("Getalldesignation")]
+        public async Task<BaseResponse> GetAllDesignation()
+        {
+            return await _userServices.GetAllDesignation();
+        }
+        [HttpPost]
+        [Route("Getdesignationbyid")]
+        public async Task<BaseResponse> GetDesignationByID(int PositionId)
+        {
+            return await _userServices.GetDesignationByID(PositionId);
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("EdutDesignation")]
+        public async Task<BaseResponse> EditDesignation(EditDesignationvm editDesignationvm)
+        {
+
+            return await _userServices.EditDesignation(editDesignationvm);
+        }
+
+   
+
 
     }
 

@@ -36,6 +36,9 @@ namespace PayhouseDragonFly.CORE.DTOs.RegisterVms
         public string? ReasonforStatus { get; set; }
 
         public string UserActiveMessage { get; set; }
+        public string PositionName { get; set; }
+        public string PositionDescription { get; set; }
+
 
     }
 }

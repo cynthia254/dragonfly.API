@@ -2,10 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.RolesResponse;
 using PayhouseDragonFly.CORE.Models.Roles;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices;
+using System.Linq.Expressions;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
 {
@@ -13,8 +15,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
     {
         private UserManager<PayhouseDragonFlyUsers> _userManager;
         private readonly UserManager<PayhouseDragonFlyUsers> _signinmanager;
-        
-
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly DragonFlyContext _dragonflyContext;
         private readonly DragonFlyContext _context;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILoggeinUserServices _loggedinuser;
@@ -22,15 +24,19 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
             IServiceScopeFactory scopeFactory,
             UserManager<PayhouseDragonFlyUsers> userManager,
             UserManager<PayhouseDragonFlyUsers> signinmanager,
-            ILoggeinUserServices loggedinuser
+            ILoggeinUserServices loggedinuser,
+            DragonFlyContext dragonflyContext,
+            IServiceScopeFactory serviceScopeFactory
 
             )
         {
             _context = context;
+            _serviceScopeFactory= serviceScopeFactory;
             _scopeFactory = scopeFactory;
             _userManager = userManager;
             _signinmanager = signinmanager;
             _loggedinuser = loggedinuser;
+            _dragonflyContext = dragonflyContext;
         }
         public async Task<RolesResponse> CreateRole(string Rolename)
         {
@@ -197,7 +203,149 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
             return "";
         }
 
-      
+        public async Task<Rolesresponse> AddRoleClaim(string roleclaimname)
+        {
+
+
         
+            if (roleclaimname == "")
+            {
+
+                return new Rolesresponse(false, "Claim name cannot be null", null);
+                //return new RolesResponse(false, "Claim name cannot be null", null)
+            }
+
+
+            var roleclainexists = await _dragonflyContext.RoleClaimsTable.Where(x => x.ClaimName == roleclaimname).FirstOrDefaultAsync();
+
+            if (roleclainexists != null)
+            {
+                return new Rolesresponse(false, "Claim already exists", null);
+
+            }
+            var roleclaimadded = new RoleClaimsTable
+            {
+
+                ClaimName = roleclaimname
+            };
+
+            await _dragonflyContext.AddAsync(roleclaimadded);
+            await _dragonflyContext.SaveChangesAsync();
+            return new Rolesresponse(true, "Successfully added role Claim type", null);
+            // return new RolesResponse(true, "Role claim addedd successfully", null);
+
+
+        }
+
+        public async Task<Rolesresponse> GetAllRolecLaims()
+        {
+            var allclaims = await _dragonflyContext.RoleClaimsTable.ToListAsync();
+
+            return  new Rolesresponse(true, "role claims queried successfully", allclaims);
+        }
+
+
+
+        public async Task<Rolesresponse> AddClaimsToRole(int roleid, int claimid)
+        {
+            try
+            {
+                 using( var scope= _serviceScopeFactory.CreateScope())
+                        {
+                             var scopedcontext= scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var checkifclaimexists=  await scopedcontext.Claim_Role_Map.Where(x=>x.ClaimId == claimid  && x.RoleId==roleid).FirstOrDefaultAsync();
+
+
+                    if (checkifclaimexists != null)
+                    {
+                        return new Rolesresponse(false, "Claim already exists", null);
+
+                    }
+
+                    var new_claim_role_map = new Claim_Role_Map
+                    {
+                        RoleId = roleid,
+                        ClaimId = claimid
+                    };
+
+                    await scopedcontext.AddAsync(new_claim_role_map);
+                    await scopedcontext.SaveChangesAsync();
+
+                    return new Rolesresponse(true, "Successfully added claim to role", null);
+
+                        }
+
+            }
+            catch(Exception ex){
+
+                return new Rolesresponse(false, ex.Message, null);
+            }
+
+        }
+        public async Task<RoleClaimsResponse> GetRoleClaims(int roleid)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+
+                    //get associated role
+                    var roleexists = await scopedcontext.RolesTable.Where(r => r.RolesID == roleid).FirstOrDefaultAsync();
+
+                    if(roleexists == null)
+                    {
+
+                        return new RoleClaimsResponse(false, "Role does not exist", "No role", null);
+
+                    }
+
+                    //get all related  claims to athe role found role mapper(only shows ids)
+
+                    var roleclaimsexists = await scopedcontext.Claim_Role_Map.Where(rc => rc.RoleId == roleid).ToListAsync();
+
+                  
+                    if (roleclaimsexists == null)
+                    {
+                        return new RoleClaimsResponse(false, "Role claims does not exist", "No role claims", null);
+                    }
+                    //all claims on claim table(specific name)
+
+
+                    List<RoleClaimsTable> claimstable = new List<RoleClaimsTable>();
+
+                    foreach (var role in roleclaimsexists)
+                    {
+                        var claimqueried = await scopedcontext.RoleClaimsTable.Where(x => x.RolesClaimsTableId == role.ClaimId).FirstOrDefaultAsync();
+                        var newclaimfound = new RoleClaimsTable 
+                            { 
+                                RolesClaimsTableId=claimqueried.RolesClaimsTableId,                
+                                ClaimName =claimqueried.ClaimName,
+         
+                            };
+
+                        claimstable.Add(newclaimfound);
+
+
+                    }
+
+
+
+                    //return values found
+
+                    return new RoleClaimsResponse(true, "Queries sueccessfully",roleexists.RoleName, claimstable);
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+
+                return new RoleClaimsResponse(false, ex.Message, "No role", null);
+            }
+
+        }
     }
 }

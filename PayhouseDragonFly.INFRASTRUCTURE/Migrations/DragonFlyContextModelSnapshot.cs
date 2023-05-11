@@ -155,6 +155,63 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Designation.Designation", b =>
+                {
+                    b.Property<int>("PostionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PostionId"));
+
+                    b.Property<string>("PositionDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PositionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PostionId");
+
+                    b.ToTable("Designation");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Roles.Claim_Role_Map", b =>
+                {
+                    b.Property<int>("ClaimRoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClaimRoleId"));
+
+                    b.Property<int>("ClaimId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ClaimRoleId");
+
+                    b.ToTable("Claim_Role_Map");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Roles.RoleClaimsTable", b =>
+                {
+                    b.Property<int>("RolesClaimsTableId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RolesClaimsTableId"));
+
+                    b.Property<string>("ClaimName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RolesClaimsTableId");
+
+                    b.ToTable("RoleClaimsTable");
+                });
+
             modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Roles.RolesTable", b =>
                 {
                     b.Property<int>("RolesID")
@@ -337,6 +394,14 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Position")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PositionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PostionDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

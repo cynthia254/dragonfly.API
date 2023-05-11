@@ -30,6 +30,8 @@ namespace PayhouseDragonFly.CORE.Models.UserRegistration
         public string DepartmentDescription { get; set; }
         public string UserStatus { get; set; }
         public string StatusReason{get;set;}
+        public string PositionName { get; set; }
+        public string PostionDescription { get; set; }
 
         public bool UserActive { get; set; }
         

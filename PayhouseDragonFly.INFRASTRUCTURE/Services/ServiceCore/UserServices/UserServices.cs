@@ -8,11 +8,16 @@ using PayhouseDragonFly.API.Controllers.User;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.RolesResponse;
+using PayhouseDragonFly.CORE.DTOs.Designation;
 using PayhouseDragonFly.CORE.DTOs.EmaillDtos;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
 using PayhouseDragonFly.CORE.DTOs.userStatusvm;
 using PayhouseDragonFly.CORE.Models.departments;
+using PayhouseDragonFly.CORE.Models.Designation;
+using PayhouseDragonFly.CORE.Models.Roles;
 using PayhouseDragonFly.CORE.Models.statusTable;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
@@ -151,7 +156,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         UserStatus = "",
                         StatusReason = "New",
                         UserActive = false,
-                        DepartmentDescription = "Any Description"
+                        DepartmentDescription = "Any Description",
+                        PostionDescription="Any Description",
+                        PositionName="Any name",
                     };
 
                     var response = await _userManager.CreateAsync(newuser, rv.Password);
@@ -339,7 +346,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                             StatusReason = user.StatusReason,
                             UserId=user.Id,
                             StatusDescription=user.StatusDescription,
-                            ReasonforStatus=user.ReasonforStatus
+                            ReasonforStatus=user.ReasonforStatus,
+                            PositionName=user.PositionName,
+                            PositionDescription=user.PostionDescription
 
 
 
@@ -430,6 +439,11 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     if (userexists == null)
                     {
                         return new BaseResponse("009", "User does not exist", null);
+                    }
+
+                    if (userexists.EmailConfirmed)
+                    {
+                        return new BaseResponse("103", "User Account already confirmed", null);
                     }
                     userexists.EmailConfirmed = true;
 
@@ -686,7 +700,13 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     //logedin user check date
 
                     
-
+                    if(vm.ReasonforStatus== "PERMANENTLY SUSPENDED")
+                    {
+                        var anydate = new DateTime();
+                        var convertedanydate=anydate.ToString();
+                        vm.StartDate = convertedanydate;
+                        vm.EndDate = convertedanydate; 
+                    }
                     //get loggin in user
 
                     var userexists = await scopedcontext.PayhouseDragonFlyUsers.Where(u => u.Id == vm.userId).FirstOrDefaultAsync();
@@ -707,6 +727,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         StartDate =Convert.ToDateTime(vm.StartDate),
                         EndDate= Convert.ToDateTime(vm.EndDate)
                     };
+
 
                    newuserstatus.Totaldays =(int) (Convert.ToDateTime(vm.EndDate)-Convert.ToDateTime( vm.StartDate)).TotalDays;
 
@@ -783,7 +804,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
 
         //edit user details
-        public async Task<BaseResponse> EditUserDetails(RegisterVms edituservm, string userid)
+        public async Task<BaseResponse> EditUserDetails(RegisterVms edituservm)
         {
             try
             {
@@ -793,7 +814,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
                     var scopedcontext=scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
 
-                    var userexists = await scopedcontext.PayhouseDragonFlyUsers.Where(u => u.Id == userid).FirstOrDefaultAsync();
+                    var userexists = await scopedcontext.PayhouseDragonFlyUsers.Where(u => u.Id == edituservm.EditorId).FirstOrDefaultAsync();
 
                     if (userexists == null)
                     {
@@ -859,7 +880,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
                     if (edituservm.Address == "string")
                     {
-                        userexists.Address=userexists.Address;
+                        userexists.Address = userexists.Address;
 
                         _logger.LogInformation("Nothing to show here");
                     }
@@ -1004,9 +1025,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
 
                 var getuseronstatustable = await _authDbContext.UserStatusTable.Where(x => x.userId == userexsists.Id).FirstOrDefaultAsync();
-            getuseronstatustable.StatusDescription = "";
-            getuseronstatustable.ReasonforStatus = "";
-            _authDbContext.Update(getuseronstatustable);
+          
+            _authDbContext.Remove(getuseronstatustable);
             await _authDbContext.SaveChangesAsync();
 
 
@@ -1017,9 +1037,165 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
 
         }
+        public async Task<BaseResponse> AddDesignation(AddDesignationvms addDesignationvms)
+        {
+            try
+            {
+                if (addDesignationvms.PositionName == "")
+                {
+                    return new BaseResponse("150", "Position Name cannot be empty", null);
+                }
+                if (addDesignationvms.PositionDescription == "")
+                {
+                    return new BaseResponse("150", "Position Description cannot be empty", null);
+                }
+
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var newDesignation = new Designation
+                    {
+
+                        PositionName = addDesignationvms.PositionName,
+                        PositionDescription = addDesignationvms.PositionDescription,
+
+
+                    };
+
+                    var response = await scopedcontext.AddAsync(newDesignation);
+                    await scopedcontext.SaveChangesAsync();
+                    return new BaseResponse("200", "Designation created successfully ", newDesignation);
 
 
 
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse("150", ex.Message, null);
+            }
+
+
+
+
+        }
+        public async Task<BaseResponse> GetAllDesignation()
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedcontent = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var alldesignation = await scopedcontent.Designation.ToListAsync();
+
+                    if (alldesignation == null)
+                    {
+                        return new BaseResponse("120", "No designation found", null);
+                    }
+
+                    return new BaseResponse("200", "Queried successfully", alldesignation);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return new BaseResponse("190", ex.Message, ex.StackTrace);
+            }
+        }
+        public async Task<BaseResponse> getallDesignation()
+        {
+            var alldesignation = await _authDbContext.Designation.ToListAsync();
+
+            return new BaseResponse("200", "queried successfully", alldesignation);
+        }
+        public async Task<BaseResponse> GetDesignationByID(int PositionId)
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var designationexists = await scopedcontext.Designation.Where(x => x.PostionId == PositionId).FirstOrDefaultAsync();
+                    if (designationexists == null)
+                    {
+                        return new BaseResponse("130", "Designation does not exist", null);
+
+                    }
+
+                    return new BaseResponse("200", "Queried successfully", designationexists);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse("120", ex.Message, null);
+            }
+        }
+        public async Task<BaseResponse> EditDesignation(EditDesignationvm editDesignationvm)
+        {
+            try
+            {
+
+                using (var scope = _scopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var designationexists = await scopedcontext.Designation.Where(u => u.PostionId == editDesignationvm.PositionId).FirstOrDefaultAsync();
+
+                    if (designationexists == null)
+                    {
+
+                        return new BaseResponse("180", "Designation does not exist", null);
+                    }
+
+                    if (editDesignationvm.PositionName == "string")
+                    {
+                        designationexists.PositionName = designationexists.PositionName;
+
+                    }
+                    else
+                    {
+                        designationexists.PositionName = editDesignationvm.PositionName;
+                    }
+
+
+                    if (editDesignationvm.PositionDescription == "string")
+                    {
+                        designationexists.PositionDescription = designationexists.PositionDescription;
+                        _logger.LogInformation("Nothing to show here");
+                    }
+                    else
+                    {
+                        designationexists.PositionDescription = editDesignationvm.PositionDescription;
+                    }
+
+
+
+                    scopedcontext.Update(designationexists);
+                    await scopedcontext.SaveChangesAsync();
+
+                    return new BaseResponse("200", "Sucessfully updated designation details", designationexists);
+
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                return new BaseResponse("130", ex.Message, null);
+            }
+        }
+
+
+        //role services start
+
+     
 
 
 

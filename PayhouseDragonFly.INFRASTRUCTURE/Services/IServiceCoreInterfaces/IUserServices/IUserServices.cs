@@ -2,6 +2,8 @@
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.RolesResponse;
+using PayhouseDragonFly.CORE.DTOs.Designation;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
 using PayhouseDragonFly.CORE.DTOs.userStatusvm;
@@ -28,8 +30,14 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUser
         Task<BaseResponse> ChangeUserStatus(userStatusvm vm);
         Task<BaseResponse> GetUserActiveStatusByid(string userid);
         Task<BaseResponse> GetLoggedInUser();
-        Task<BaseResponse> EditUserDetails(RegisterVms edituservm, string userid);
+        Task<BaseResponse> EditUserDetails(RegisterVms edituservm);
         Task EmailOnLeaveCompletion();
         Task<BaseResponse> ActivateUser(string useremail);
+        Task<BaseResponse> AddDesignation(AddDesignationvms addDesignationvms);
+        Task<BaseResponse> GetAllDesignation();
+        Task<BaseResponse> getallDesignation();
+        Task<BaseResponse> GetDesignationByID(int PositionId);
+        Task<BaseResponse> EditDesignation(EditDesignationvm editDesignationvm);
+        
     }
 }

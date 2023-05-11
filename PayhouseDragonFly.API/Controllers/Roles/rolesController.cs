@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.RolesResponse;
 using PayhouseDragonFly.CORE.DTOs.Ticketsvms;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices;
 
@@ -44,9 +45,45 @@ namespace PayhouseDragonFly.API.Controllers.Roles
             return await _roleServices.AssignUserToRole(useremail,roleid);
 
         }
-        
 
-      }
+
+
+        //[Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("AddRoleClaim")]
+        public async Task<Rolesresponse> AddRoleClaim(string roleclaimname)
+        {
+            return await _roleServices.AddRoleClaim(roleclaimname);
+        }
+
+
+        //[Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet]
+        [Route("AllClaims")]
+       
+        public async Task<Rolesresponse> GetAllRolecLaims()
+        {
+            return await _roleServices.GetAllRolecLaims();
+        }
+
+        //[Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("AddClaimstoRoles")]
+        public async Task<Rolesresponse> AddClaimsToRole(int roleid, int claimid)
+        {
+
+            return await _roleServices.AddClaimsToRole(roleid, claimid);
+        }
+
+        //[Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetAllroleClaims")]
+        public async Task<RoleClaimsResponse> GetRoleClaims(int roleid)
+        {
+
+            return await _roleServices.GetRoleClaims(roleid);   
+        }
+    }
 
 }
 
