@@ -8,8 +8,6 @@ using PayhouseDragonFly.API.Controllers.User;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
-using PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse;
-using PayhouseDragonFly.CORE.ConnectorClasses.Response.RolesResponse;
 using PayhouseDragonFly.CORE.DTOs.Designation;
 using PayhouseDragonFly.CORE.DTOs.EmaillDtos;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
@@ -17,7 +15,6 @@ using PayhouseDragonFly.CORE.DTOs.RegisterVms;
 using PayhouseDragonFly.CORE.DTOs.userStatusvm;
 using PayhouseDragonFly.CORE.Models.departments;
 using PayhouseDragonFly.CORE.Models.Designation;
-using PayhouseDragonFly.CORE.Models.Roles;
 using PayhouseDragonFly.CORE.Models.statusTable;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
@@ -44,7 +41,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
         private readonly IEExtraServices _extraservices;
         private readonly IEmailServices _emailServices;
         private readonly ILoggeinUserServices _loggeinUserServices;
-       
+
         public UserServices(
           IEmailServices emailServices,
         UserManager<PayhouseDragonFlyUsers> userManager,
@@ -155,15 +152,17 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         RoleId = 4,
                         UserStatus = "",
                         StatusReason = "New",
+                        ReasonforStatus = "NEW",
                         UserActive = false,
                         DepartmentDescription = "Any Description",
-                        PostionDescription="Any Description",
-                        PositionName="Any name",
+                        PostionDescription = "Any Description",
+                        PositionName = "Any name",
                     };
 
                     var response = await _userManager.CreateAsync(newuser, rv.Password);
                     if (response.Succeeded)
                     {
+                        //sent email to user 
                         var emailpayload = $"Hi there {rv.FirstName} {rv.LastName}, thank you for your" +
                               $" registration to Payhouse Limited. Kindly contact the administrator for your account to be activated ";
 
@@ -179,19 +178,45 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         if (!results.IsSent)
                         {
                             return new RegisterResponse("130", "User not registered successfully", null);
-                           
+
+                        }
+                        //sent email to admins
+
+                        //get all users
+                        var allusers = await scopedcontext.PayhouseDragonFlyUsers.Where(u=>u.RoleId==1).ToListAsync();
+
+                        if (allusers == null)
+                        {
+
+                            _logger.LogInformation("Admins not found");
+                        }
+
+                        foreach (var onesuperadmin in allusers)
+                        {
+
+                            var bodyofemail = new EmailbodyOnCreatedUser {
+
+                                AdminNames = onesuperadmin.FirstName + " " + onesuperadmin.LastName,
+                                ToEmail=onesuperadmin.Email,
+                                PayLoad=$"A new user {rv.FirstName} {rv.LastName} has been created on the system , kindly, log in and activate him or her",
+                                CreatedDate=onesuperadmin.DateCreated,
+                                UserName=onesuperadmin.UserName,
+                              };
+                          var resp=  await _emailServices.EmailOnCreatedUser(bodyofemail);
+
+                            _logger.LogInformation($"______||||||_____{resp}");
+
                         }
 
                         return new RegisterResponse("200", "Registered user successfully. Kindly wait for admin approval ", newuser);
-
-
+                      
                     }
                     else
                     {
                         return new RegisterResponse("179", response.ToString(), newuser);
                     }
 
-                 //   return new RegisterResponse("140", "something foregin happened", null);
+                    //   return new RegisterResponse("140", "something foregin happened", null);
 
                 }
             }
@@ -201,7 +226,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 return new RegisterResponse("150", ex.Message, null);
 
             }
-           
+
         }
 
 
@@ -240,6 +265,12 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     {
                         return new authenticationResponses("110", "Kindly authenticate account first", "", "", "", "");
                     }
+                    if (!identityUser.UserActive)
+                    {
+                        return new authenticationResponses("112", "Account Inactive.Kindly contact Admin", "", "", "", "");
+                    }
+                   
+                   
                     if (identityUser != null)
                     {
                         var result =
@@ -301,6 +332,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 _logger.LogInformation("Error message on login : ", e.Message);
                 return new authenticationResponses("190", e.Message, "", "", "", "");
             }
+           
         }
 
         public async Task<BaseResponse> GetAllUsers()
@@ -344,11 +376,11 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                             DepartmentDescription = user.DepartmentDescription,
                             Email = user.Email,
                             StatusReason = user.StatusReason,
-                            UserId=user.Id,
-                            StatusDescription=user.StatusDescription,
-                            ReasonforStatus=user.ReasonforStatus,
-                            PositionName=user.PositionName,
-                            PositionDescription=user.PostionDescription
+                            UserId = user.Id,
+                            StatusDescription = user.StatusDescription,
+                            ReasonforStatus = user.ReasonforStatus,
+                            PositionName = user.PositionName,
+                            PositionDescription = user.PostionDescription
 
 
 
@@ -377,6 +409,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         else
                         {
                             userslisted.UserActiveMessage = "InActive";
+                            
                         }
                         userslist.Add(userslisted);
 
@@ -502,7 +535,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
         public async Task<BaseResponse> GetUserById(string userId)
         {
             // var user = await _authDbContext.Tickets.Where(x =>x.Id==userId).FirstOrDefaultAsync();
-            var userexists = _userManager.FindByIdAsync(userId);
+            var userexists = await _userManager.FindByIdAsync(userId);
 
             if (userexists == null)
             {
@@ -699,13 +732,13 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     var scopedcontext = scoper.ServiceProvider.GetRequiredService<DragonFlyContext>();
                     //logedin user check date
 
-                    
-                    if(vm.ReasonforStatus== "PERMANENTLY SUSPENDED")
+
+                    if (vm.ReasonforStatus == "PERMANENTLY SUSPENDED")
                     {
                         var anydate = new DateTime();
-                        var convertedanydate=anydate.ToString();
+                        var convertedanydate = anydate.ToString();
                         vm.StartDate = convertedanydate;
-                        vm.EndDate = convertedanydate; 
+                        vm.EndDate = convertedanydate;
                     }
                     //get loggin in user
 
@@ -724,12 +757,12 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         StatusDescription = vm.StatusDescription,
                         UsertActive = false,
                         ReasonforStatus = vm.ReasonforStatus,
-                        StartDate =Convert.ToDateTime(vm.StartDate),
-                        EndDate= Convert.ToDateTime(vm.EndDate)
+                        StartDate = Convert.ToDateTime(vm.StartDate),
+                        EndDate = Convert.ToDateTime(vm.EndDate)
                     };
 
 
-                   newuserstatus.Totaldays =(int) (Convert.ToDateTime(vm.EndDate)-Convert.ToDateTime( vm.StartDate)).TotalDays;
+                    newuserstatus.Totaldays = (int)(Convert.ToDateTime(vm.EndDate) - Convert.ToDateTime(vm.StartDate)).TotalDays;
 
                     var useralreadyinactive = await scopedcontext.UserStatusTable.Where(r => r.userId == vm.userId).FirstOrDefaultAsync();
 
@@ -742,7 +775,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     await scopedcontext.SaveChangesAsync();
 
                     userexists.UserActive = false;
-                    userexists.StatusReason= vm.ReasonforStatus;
+                    userexists.StatusReason = vm.ReasonforStatus;
                     userexists.StatusDescription = vm.StatusDescription;
                     userexists.ReasonforStatus = vm.ReasonforStatus;
                     scopedcontext.Update(userexists);
@@ -797,7 +830,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
         public async Task<BaseResponse> GetLoggedInUser()
         {
 
-            var loggeinuser =  _loggeinUserServices.LoggedInUser().Result;
+            var loggeinuser = _loggeinUserServices.LoggedInUser().Result;
 
             return new BaseResponse("200", " Successfully queried loggin user", loggeinuser);
         }
@@ -809,10 +842,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
             try
             {
 
-                using(var scope= _scopeFactory.CreateScope())
+                using (var scope = _scopeFactory.CreateScope())
                 {
 
-                    var scopedcontext=scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
 
                     var userexists = await scopedcontext.PayhouseDragonFlyUsers.Where(u => u.Id == edituservm.EditorId).FirstOrDefaultAsync();
 
@@ -825,17 +858,17 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     if (edituservm.FirstName == "string")
                     {
                         userexists.FirstName = userexists.FirstName;
-                       
+
                     }
                     else
                     {
-                        userexists.FirstName=edituservm.FirstName;
+                        userexists.FirstName = edituservm.FirstName;
                     }
 
 
                     if (edituservm.LastName == "string")
                     {
-                        userexists.LastName=userexists.LastName;
+                        userexists.LastName = userexists.LastName;
                         _logger.LogInformation("Nothing to show here");
                     }
                     else
@@ -852,12 +885,12 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     else
                     {
                         userexists.DepartmentName = edituservm.DepartmentName;
-                    } 
+                    }
 
 
                     if (edituservm.Position == "string")
                     {
-                        userexists.Position= userexists.Position;
+                        userexists.Position = userexists.Position;
                         _logger.LogInformation("Nothing to show here");
 
                     }
@@ -867,8 +900,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     }
 
 
-                    if (edituservm.BusinessUnit =="string")
-                    { 
+                    if (edituservm.BusinessUnit == "string")
+                    {
                         userexists.BusinessUnit = userexists.BusinessUnit;
                         _logger.LogInformation("Nothing to show here");
                     }
@@ -925,7 +958,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 }
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
                 return new BaseResponse("130", ex.Message, null);
@@ -966,12 +999,12 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         //create email body
 
                         var emailbody = new EmailbodyOnLeaveEnd
-                            {
-                            ToEmail=userexists.Email,
+                        {
+                            ToEmail = userexists.Email,
                             Names = userexists.FirstName + " " + userexists.LastName,
-                            UserName=userexists.Email,
-                            LeaveEndDate=singleuserstatusobject.EndDate,
-                            PayLoad="Reminder"
+                            UserName = userexists.Email,
+                            LeaveEndDate = singleuserstatusobject.EndDate,
+                            PayLoad = "Reminder"
 
                         };
 
@@ -982,7 +1015,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                             //send mail if true
 
 
-                           await  _emailServices.SendEmailOnLeaveCompletion(emailbody);
+                            await _emailServices.SendEmailOnLeaveCompletion(emailbody);
                         }
                         else
                         {
@@ -1000,12 +1033,12 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 _logger.LogInformation($"___________--------________|||||||{ex.Message}_________");
             }
         }
-        public async Task<BaseResponse>  ActivateUser(string useremail)
+        public async Task<BaseResponse> ActivateUser(string useremail)
         {
 
             // get user
 
-            var userexsists = await _authDbContext.PayhouseDragonFlyUsers.Where(x=>x.UserName==useremail).FirstOrDefaultAsync();
+            var userexsists = await _authDbContext.PayhouseDragonFlyUsers.Where(x => x.UserName == useremail).FirstOrDefaultAsync();
             if (userexsists == null)
             {
 
@@ -1019,19 +1052,19 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
 
 
-             _authDbContext.Update(userexsists);
+            _authDbContext.Update(userexsists);
             await _authDbContext.SaveChangesAsync();
 
 
 
-                var getuseronstatustable = await _authDbContext.UserStatusTable.Where(x => x.userId == userexsists.Id).FirstOrDefaultAsync();
-          
+            var getuseronstatustable = await _authDbContext.UserStatusTable.Where(x => x.userId == userexsists.Id).FirstOrDefaultAsync();
+
             _authDbContext.Remove(getuseronstatustable);
             await _authDbContext.SaveChangesAsync();
 
 
 
-            
+
 
             return new BaseResponse("200", $"Successfully activated user {userexsists.FirstName}  {userexsists.LastName}", null);
 
@@ -1195,7 +1228,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
         //role services start
 
-     
+
 
 
 

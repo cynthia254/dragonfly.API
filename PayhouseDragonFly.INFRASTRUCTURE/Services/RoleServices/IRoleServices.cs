@@ -1,4 +1,5 @@
-﻿using PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse;
+﻿using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.RolesResponse;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
@@ -13,5 +14,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
         Task<Rolesresponse> GetAllRolecLaims();
         Task<Rolesresponse> AddClaimsToRole(int roleid, int claimid);
         Task<RoleClaimsResponse> GetRoleClaims(int roleid);
+        Task<BaseResponse> GetRoleByID(int Roleid);
+        Task<BaseResponse> GetRoleClaimByname(string claimname);
+        Task<bool> CheckClaimInRole(String claimname, int roleid);
     }
 }

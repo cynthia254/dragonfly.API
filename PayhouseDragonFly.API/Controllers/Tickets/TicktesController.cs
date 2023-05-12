@@ -7,7 +7,9 @@ using PayhouseDragonFly.CORE.DTOs.escalate;
 using PayhouseDragonFly.CORE.DTOs.resolve;
 using PayhouseDragonFly.CORE.DTOs.Ticketsvms;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices.RoleChecker;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IticketsCoreServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices;
 
 namespace PayhouseDragonFly.API.Controllers.Tickets
 {
@@ -18,10 +20,21 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
     {
         private readonly IRoleChecker _rolechecker;
         public readonly IticketsCoreServices _ticketServices;
-        public TicktesController(IticketsCoreServices ticketServices, IRoleChecker rolechecker)
+        private readonly ILoggeinUserServices _loggeinuser;
+
+        private readonly IRoleServices _roleservices;
+        public TicktesController(
+            IticketsCoreServices ticketServices,
+            IRoleChecker rolechecker,
+            IRoleServices roleservices,
+            ILoggeinUserServices loggeinuser
+            )
         {
             _ticketServices = ticketServices;
             _rolechecker= rolechecker;
+            _loggeinuser = loggeinuser;
+            _roleservices = roleservices;
+
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -29,16 +42,30 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
         [Route("RegisterTicket")]
         public async Task<BaseResponse> AddTicket(Ticketsvms vm)
         {
-            var roleidretured = _rolechecker.Returnedrole().Result;
-            if (roleidretured == 2 || roleidretured==1 || roleidretured==3)
+            var roleclaimname = "CanCreateTicket";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+
+            if (loggedinuser.RoleId >0)
             {
-                return await _ticketServices.AddTicket(vm);
+
+                if (roleclaimtrue)
+                {
+                    return await _ticketServices.AddTicket(vm);
+                }
+                else if(!roleclaimtrue) 
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
+
+                }
             }
             else
             {
 
                 return new BaseResponse("120", "You have no permission access this", null);
             }
+            return new BaseResponse("", "", null);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -46,18 +73,30 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
         [Route("GetAllTickets")]
         public async Task<BaseResponse> GetAllTickets()
         {
-            var roleidretured = _rolechecker.Returnedrole().Result;
-            if (roleidretured == 1)
-            {
-                return await _ticketServices.GetAllTickets();
+            var roleclaimname = "CanViewAllTickets";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
 
+            if (loggedinuser.RoleId >0)
+            {
+
+                if (roleclaimtrue)
+                {
+                    return await _ticketServices.GetAllTickets();
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
+
+                }
             }
             else
             {
 
                 return new BaseResponse("120", "You have no permission access this", null);
             }
-
+            return new BaseResponse("", "", null);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -65,16 +104,30 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
         [Route("EditTicketsStatus")]
         public async Task<BaseResponse> EditTicketStatus(string status, int ticketid)
         {
-            var roleidretured = _rolechecker.Returnedrole().Result;
-            if (roleidretured == 2 || roleidretured == 1 || roleidretured == 3)
+            var roleclaimname = "CanChangeTicketStatus";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+
+            if (loggedinuser.RoleId > 0)
             {
-                return await _ticketServices.EditTicketStatus(status, ticketid);
+
+                if (roleclaimtrue)
+                {
+                    return await _ticketServices.EditTicketStatus(status, ticketid);
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
+
+                }
             }
             else
             {
 
                 return new BaseResponse("120", "You have no permission access this", null);
             }
+            return new BaseResponse("", "", null);
         }
 
 
@@ -93,23 +146,60 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
         [Route("Assigntickettouser")]
         public async Task<BaseResponse> AsignedUserToTicket(asignuservm assignvm)
         {
-            var roleidretured = _rolechecker.Returnedrole().Result;
-            if (roleidretured == 2 || roleidretured == 1 || roleidretured == 3)
+            var roleclaimname = "CanAssignTicketToUser";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+
+            if (loggedinuser.RoleId > 0)
             {
-                return await _ticketServices.AsignedUserToTicket(assignvm);
+
+                if (roleclaimtrue)
+                {
+                    return await _ticketServices.AsignedUserToTicket(assignvm);
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
+
+                }
             }
             else
             {
 
                 return new BaseResponse("120", "You have no permission access this", null);
             }
+            return new BaseResponse("", "", null);
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("resolveticket")]
-        public async Task<BaseResponse> ResolveTicket(ResolveVm resolvevm){
-            return await _ticketServices.ResolveTicket(resolvevm);
+        public async Task<BaseResponse> ResolveTicket(ResolveVm resolvevm)
+        {
+            var roleclaimname = "CanResolveTicket";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
 
+            if (loggedinuser.RoleId > 0)
+            {
+
+                if (roleclaimtrue)
+                {
+                    return await _ticketServices.ResolveTicket(resolvevm);
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
+
+                }
+            }
+            else
+            {
+
+                return new BaseResponse("120", "You have no permission access this", null);
+            }
+            return new BaseResponse("", "", null);
 
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -117,17 +207,62 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
         [Route("escalateticket")]
         public async Task<BaseResponse> EscalateTicket(Escalatevm escalatevm)
         {
-            return await _ticketServices.EscalateTicket(escalatevm);
+            var roleclaimname = "CanEscalateTicket";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            if (loggedinuser.RoleId >0)
+            {
 
+                if (roleclaimtrue)
+                {
+                    return await _ticketServices.EscalateTicket(escalatevm);
 
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
+
+                }
+            }
+            else
+            {
+
+                return new BaseResponse("120", "You have no permission access this", null);
+            }
+            return new BaseResponse("", "", null);
         }
+
+
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("closeticket")]
         public async Task<BaseResponse> CloseTicket(CloseTicketvm closeTicketvm)
         {
-            return await _ticketServices.CloseTicket(closeTicketvm);
+            var roleclaimname = "CanCloseTicket";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
 
+            if (loggedinuser.RoleId >0)
+            {
+
+                if (roleclaimtrue)
+                {
+                    return await _ticketServices.CloseTicket(closeTicketvm);
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
+
+                }
+            }
+            else
+            {
+
+                return new BaseResponse("120", "You have no permission access this", null);
+            }
+            return new BaseResponse("", "", null);
 
         }
 

@@ -169,6 +169,52 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
             }
         }
 
+
+        //email on created user
+
+        public async Task<mailresponse>EmailOnCreatedUser(EmailbodyOnCreatedUser usermailvm)
+        {
+            try
+            {
+                _logger.LogInformation($"_____________________1.  email on registration service started  at {DateTime.Now} _______________________________");
+                var file = @"Templates/Email/emailon_new_User_Created.html";
+                var email = new MimeMessage { Sender = MailboxAddress.Parse(_emailconfig.SmtpUser) };
+                StreamReader str = new StreamReader(file);
+                string MailText = await str.ReadToEndAsync();
+                str.Close();
+                var datesent =  DateTime.Now.ToString("dddd, dd MMMM yyyy");
+                var datecreated=  usermailvm.CreatedDate.ToString("dddd, dd MMMM yyyy");
+                MailText = MailText.Replace("subject", "Notification on User Creation")
+                    .Replace("usermail", _emailconfig.SmtpUser)
+                    .Replace("emailsentdate", datesent)
+                    .Replace("payload", usermailvm.PayLoad)
+                    .Replace("useremail", usermailvm.UserEmail)
+                    .Replace("dateCreated", datecreated)
+                    .Replace("admin_names", usermailvm.AdminNames);
+
+
+                var builder = new BodyBuilder { HtmlBody = MailText };
+                email.Body = builder.ToMessageBody();
+                email.To.Add(MailboxAddress.Parse(usermailvm.ToEmail));
+                email.Subject = "Notification on User Creation";
+                using var smtp = new SmtpClient();
+                smtp.Connect(_emailconfig.SmtpHost, Convert.ToInt32(_emailconfig.SmtpPort),
+                    MailKit.Security.SecureSocketOptions.StartTls);
+                smtp.Authenticate(_emailconfig.EmailFrom, _emailconfig.SmtpPass);
+                var resp = await smtp.SendAsync(email);
+                _logger.LogInformation("____________________ 3 email sender links ________________________________");
+                smtp.Disconnect(true);
+                _logger.LogInformation("____________________ 4 email sender links ________________________________");
+                _logger.LogInformation($"Email on registration sent successfully {DateTime.Now}");
+                return new mailresponse(true, "mail sent successfully");
+            }
+            catch (Exception ex)
+            {
+
+                return new mailresponse(false, ex.Message);
+            }
+        }
+
     }
 
 }

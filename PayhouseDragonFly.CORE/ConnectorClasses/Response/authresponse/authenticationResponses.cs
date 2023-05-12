@@ -16,7 +16,7 @@ namespace PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse
         public string Message { get; set; }
         public string Token { get; set; }
         public string Email { get; set; }
-
+      
         public authenticationResponses(string code,string message, string token, string email, string firstname, string lastName)
         {
             Code = code;
@@ -25,6 +25,9 @@ namespace PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse
             Email = email;
             Firstname = firstname;
             LastName = lastName;
+          
+          
+            
         }
     }
 }

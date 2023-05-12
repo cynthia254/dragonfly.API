@@ -1,12 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Org.BouncyCastle.Crypto.Prng;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.RolesResponse;
 using PayhouseDragonFly.CORE.Models.Roles;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices;
+using System.Drawing;
 using System.Linq.Expressions;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
@@ -31,7 +35,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
             )
         {
             _context = context;
-            _serviceScopeFactory= serviceScopeFactory;
+            _serviceScopeFactory = serviceScopeFactory;
             _scopeFactory = scopeFactory;
             _userManager = userManager;
             _signinmanager = signinmanager;
@@ -196,7 +200,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
                 return "Partner";
             }
 
-            else if(roleexists.RoleName=="User")
+            else if (roleexists.RoleName == "User")
             {
                 return "User";
             }
@@ -207,7 +211,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
         {
 
 
-        
+
             if (roleclaimname == "")
             {
 
@@ -241,7 +245,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
         {
             var allclaims = await _dragonflyContext.RoleClaimsTable.ToListAsync();
 
-            return  new Rolesresponse(true, "role claims queried successfully", allclaims);
+            return new Rolesresponse(true, "role claims queried successfully", allclaims);
         }
 
 
@@ -250,10 +254,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
         {
             try
             {
-                 using( var scope= _serviceScopeFactory.CreateScope())
-                        {
-                             var scopedcontext= scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
-                    var checkifclaimexists=  await scopedcontext.Claim_Role_Map.Where(x=>x.ClaimId == claimid  && x.RoleId==roleid).FirstOrDefaultAsync();
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var checkifclaimexists = await scopedcontext.Claim_Role_Map.Where(x => x.ClaimId == claimid && x.RoleId == roleid).FirstOrDefaultAsync();
 
 
                     if (checkifclaimexists != null)
@@ -267,16 +271,18 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
                         RoleId = roleid,
                         ClaimId = claimid
                     };
-
+                    var claimnameexists = await scopedcontext.RoleClaimsTable.Where(c => c.RolesClaimsTableId == claimid).FirstOrDefaultAsync();
+                    var roleeixists = await scopedcontext.RolesTable.Where(r => r.RolesID == roleid).FirstOrDefaultAsync();
                     await scopedcontext.AddAsync(new_claim_role_map);
                     await scopedcontext.SaveChangesAsync();
 
-                    return new Rolesresponse(true, "Successfully added claim to role", null);
+                    return new Rolesresponse(true, $"Successfully added claim  {claimnameexists.ClaimName} to role   {roleeixists.RoleName}", null);
 
-                        }
+                }
 
             }
-            catch(Exception ex){
+            catch (Exception ex)
+            {
 
                 return new Rolesresponse(false, ex.Message, null);
             }
@@ -294,7 +300,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
                     //get associated role
                     var roleexists = await scopedcontext.RolesTable.Where(r => r.RolesID == roleid).FirstOrDefaultAsync();
 
-                    if(roleexists == null)
+                    if (roleexists == null)
                     {
 
                         return new RoleClaimsResponse(false, "Role does not exist", "No role", null);
@@ -305,7 +311,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
 
                     var roleclaimsexists = await scopedcontext.Claim_Role_Map.Where(rc => rc.RoleId == roleid).ToListAsync();
 
-                  
+
                     if (roleclaimsexists == null)
                     {
                         return new RoleClaimsResponse(false, "Role claims does not exist", "No role claims", null);
@@ -318,12 +324,12 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
                     foreach (var role in roleclaimsexists)
                     {
                         var claimqueried = await scopedcontext.RoleClaimsTable.Where(x => x.RolesClaimsTableId == role.ClaimId).FirstOrDefaultAsync();
-                        var newclaimfound = new RoleClaimsTable 
-                            { 
-                                RolesClaimsTableId=claimqueried.RolesClaimsTableId,                
-                                ClaimName =claimqueried.ClaimName,
-         
-                            };
+                        var newclaimfound = new RoleClaimsTable
+                        {
+                            RolesClaimsTableId = claimqueried.RolesClaimsTableId,
+                            ClaimName = claimqueried.ClaimName,
+
+                        };
 
                         claimstable.Add(newclaimfound);
 
@@ -334,7 +340,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
 
                     //return values found
 
-                    return new RoleClaimsResponse(true, "Queries sueccessfully",roleexists.RoleName, claimstable);
+                    return new RoleClaimsResponse(true, "Queries sueccessfully", roleexists.RoleName, claimstable);
 
                 }
 
@@ -346,6 +352,68 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
                 return new RoleClaimsResponse(false, ex.Message, "No role", null);
             }
 
+        }
+        public async Task<BaseResponse> GetRoleByID(int Roleid)
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var roleexists = await scopedcontext.RolesTable.Where(x => x.RolesID == Roleid).FirstOrDefaultAsync();
+                    if (roleexists == null)
+                    {
+                        return new BaseResponse("130", "Role does not exist", null);
+
+                    }
+
+                    return new BaseResponse("200", "Queried successfully", roleexists);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse("120", ex.Message, null);
+            }
+        }
+
+        public async Task<BaseResponse> GetRoleClaimByname(string claimname)
+        {
+
+            var claimexists = await _context.RoleClaimsTable.Where(c => c.ClaimName == claimname).FirstOrDefaultAsync();
+
+            if (claimexists == null)
+            {
+
+                return new BaseResponse("120", "You have no permission to access this page", null);
+            }
+            return new BaseResponse("200", "successfully queried", claimexists);
+
+        }
+
+
+        public async Task<bool> CheckClaimInRole(String claimname, int roleid)
+        {
+
+            //check role claim name exists 
+            var roleclaim = await _context.RoleClaimsTable.Where(c => c.ClaimName == claimname).FirstOrDefaultAsync();
+            //check role exists
+            if (roleclaim == null)
+            {
+                return false;
+            }
+            //exists in mapper
+           var roleexists = await _context.Claim_Role_Map
+                    .Where(x => x.RoleId == roleid && x.ClaimId == roleclaim.RolesClaimsTableId).FirstOrDefaultAsync();
+
+            if (roleexists == null)
+            {
+
+                return false;
+            }
+
+            return true;
         }
     }
 }
