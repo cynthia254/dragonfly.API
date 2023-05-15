@@ -4,11 +4,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
-using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.DTOs.EmaillDtos;
 using PayhouseDragonFly.CORE.Models.Emails;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IEmailServices;
-using System.Threading;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
 {
@@ -214,8 +212,51 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
                 return new mailresponse(false, ex.Message);
             }
         }
+        public async Task<mailresponse> SendForgotPasswordLink(emailbody emailvm)
+        {
+            try
+            {
+                _logger.LogInformation($"_____________________1.  email sent for forget password service started  at {DateTime.Now} _______________________________");
+                var file = @"Templates/Email/user_link_sent_on_forget_password.html";
+                var email = new MimeMessage { Sender = MailboxAddress.Parse(_emailconfig.SmtpUser) };
+                StreamReader str = new StreamReader(file);
+                string MailText = await str.ReadToEndAsync();
+                str.Close();
+                var datesent = String.Format("{0:dd/MM/yyyy}", DateTime.Now);
+                MailText = MailText
+                    .Replace("receivernames", emailvm.UserName)
+                    .Replace("emailsentdate", datesent)
+                    .Replace("providedlink", emailvm.PayLoad);
+                    
+                var builder = new BodyBuilder { HtmlBody = MailText };
+                email.Body = builder.ToMessageBody();
+                email.To.Add(MailboxAddress.Parse(emailvm.ToEmail));
+                email.Subject = "Reset Password";
+                using var smtp = new SmtpClient();
+                smtp.Connect(_emailconfig.SmtpHost, Convert.ToInt32(_emailconfig.SmtpPort),
+                    MailKit.Security.SecureSocketOptions.StartTls);
+                smtp.Authenticate(_emailconfig.EmailFrom, _emailconfig.SmtpPass);
+                var resp = await smtp.SendAsync(email);
+                _logger.LogInformation("____________________ 3 email sender links ________________________________");
+                smtp.Disconnect(true);
+                _logger.LogInformation("____________________ 4 email sender links ________________________________");
+                _logger.LogInformation($"Email on registration sent successfully {DateTime.Now}");
+                return new mailresponse(true, "mail sent successfully");
+            }
+            catch (Exception ex)
+            {
+
+                return new mailresponse(false, ex.Message);
+            }
+        }
+
 
     }
+
+
+    //send reset email
+
+
 
 }
 

@@ -366,6 +366,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ForgetpasswordVerificationToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

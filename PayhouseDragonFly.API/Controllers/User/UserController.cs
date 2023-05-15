@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.resetpassword;
 using PayhouseDragonFly.CORE.DTOs.Designation;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
@@ -488,7 +489,8 @@ namespace PayhouseDragonFly.API.Controllers.User
             }
             return new BaseResponse("", "", null);
         }
-    
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("Getdesignationbyid")]
         public async Task<BaseResponse> GetDesignationByID(int PositionId)
@@ -526,7 +528,29 @@ namespace PayhouseDragonFly.API.Controllers.User
 
         }
 
-   
+        [HttpPost]
+        [Route("Send_Forget_Password_Link")]
+        public async   Task<BaseResponse> SendForgetPasswordLink(string useremail)
+        {
+            return await _userServices.SendForgetPasswordLink(useremail);
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("Update_password")]
+        public async Task<BaseResponse> Updatepassword(Changepasswordvm updatepasswordvm)
+        {
+            return await _userServices.Updatepassword(updatepasswordvm);
+        }
+
+        [HttpPost]
+        [Route("Reset_user_Password")]
+        public async Task<BaseResponse> Reset_Forget_User_Password(ResetPasswordvm vm)
+        {
+            return await _userServices.Reset_Forget_User_Password(vm);
+        }
+
+
 
 
     }

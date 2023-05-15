@@ -8,6 +8,7 @@ using PayhouseDragonFly.API.Controllers.User;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.resetpassword;
 using PayhouseDragonFly.CORE.DTOs.Designation;
 using PayhouseDragonFly.CORE.DTOs.EmaillDtos;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
@@ -21,6 +22,7 @@ using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IEmailServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices.IMathServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUserServices;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -41,7 +43,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
         private readonly IEExtraServices _extraservices;
         private readonly IEmailServices _emailServices;
         private readonly ILoggeinUserServices _loggeinUserServices;
-
+        private readonly IMathServices _mathservices;
         public UserServices(
           IEmailServices emailServices,
         UserManager<PayhouseDragonFlyUsers> userManager,
@@ -52,7 +54,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
          DragonFlyContext authDbContext,
          IEExtraServices extraservices,
          IServiceScopeFactory scopeFactory,
-         ILoggeinUserServices loggeinUserServices
+         ILoggeinUserServices loggeinUserServices,
+         IMathServices mathservices
             )
         {
             _userManager = userManager;
@@ -65,6 +68,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
             _extraservices = extraservices;
             _emailServices = emailServices;
             _loggeinUserServices = loggeinUserServices;
+            _mathservices=mathservices;
 
         }
 
@@ -1226,7 +1230,149 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
         }
 
 
-        //role services start
+        // forgot password service start
+
+        //part one generate token, check userm send  email link
+        public async Task<BaseResponse> SendForgetPasswordLink(string useremail)
+        {
+
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    //check if user exists
+                    var userexists = await _userManager.FindByEmailAsync(useremail);
+
+                    if (userexists == null)
+                    {
+                        return new BaseResponse("130", "User does not exist", null);
+                    }
+                    //generate random numbers 
+
+                    Random r = new Random();
+                    int randNum = r.Next(1000000);
+                    string sixDigitNumber = randNum.ToString("D6");
+                    //end random numbers functions
+
+                    var tokenexists =  _mathservices.GenerateTokenString().Result + sixDigitNumber;
+                    userexists.ForgetpasswordVerificationToken = tokenexists;
+
+                     scopedcontext.Update(userexists);
+                    await scopedcontext.SaveChangesAsync();
+
+
+                    var emailsent = new emailbody
+                    {
+                        ToEmail = userexists.Email,
+                        UserName = userexists.FirstName + " " + userexists.LastName,
+                        PayLoad = tokenexists
+                    };
+                   var resp=  await _emailServices.SendForgotPasswordLink(emailsent);
+
+                    _logger.LogInformation($"________response on email sent on link _____{resp}");
+
+                    return new BaseResponse("200", $"Kindly check your email to reset the password", null);
+
+                }
+            }
+            catch (Exception ex) {
+
+                return new BaseResponse("140", ex.Message, null);
+            }
+        }
+
+        //part two change user password
+
+
+        public async Task<BaseResponse> Reset_Forget_User_Password(ResetPasswordvm vm)
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    //get user associated
+                    var userexists = await scopedcontext.PayhouseDragonFlyUsers
+                            .Where(u => u.ForgetpasswordVerificationToken == vm.verificationtoken)
+                            .FirstOrDefaultAsync();
+
+                    if(userexists == null) 
+                    {
+                      return new BaseResponse("130", "user does not exist",null);
+                    }
+
+                    //add new password
+                    userexists.PasswordHash = _userManager
+                            .PasswordHasher
+                            .HashPassword(userexists, vm.Password);
+                     _authDbContext.Update(userexists);
+                    await _authDbContext.SaveChangesAsync(); 
+
+                    return new BaseResponse("200", "Password changed successfully", null);
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return new BaseResponse("130", ex.Message, null);
+            }
+
+        }
+
+        //chnage user password
+
+        public async Task<BaseResponse> Updatepassword(Changepasswordvm updatepasswordvm)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(updatepasswordvm.userEmail);
+
+
+                if (user == null)
+                {
+                    return new BaseResponse("650", "The user cannot be found", null);
+                        
+                }
+
+                if (updatepasswordvm.Password != updatepasswordvm.Renterpassord)
+                {
+                    return new BaseResponse("130", "passwords do not match", null);
+
+                }
+
+                var changepasswordresult = await _userManager.ChangePasswordAsync(user, updatepasswordvm.Currentpassword, updatepasswordvm.Password);
+
+
+                if (changepasswordresult.Succeeded)
+                {
+                    await _userManager.UpdateAsync(user);
+
+                    return new BaseResponse("200", "Email reset successfully", null);
+
+
+                }
+                else
+                {
+                    return new BaseResponse("130", "Password no changed successfully", null);
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return new BaseResponse("134", ex.Message, null);
+                    
+            }
+
+           
+        }
+
+
 
 
 

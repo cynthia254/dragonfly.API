@@ -2,7 +2,7 @@
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
-using PayhouseDragonFly.CORE.ConnectorClasses.Response.RolesResponse;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.resetpassword;
 using PayhouseDragonFly.CORE.DTOs.Designation;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
@@ -38,6 +38,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUser
         Task<BaseResponse> getallDesignation();
         Task<BaseResponse> GetDesignationByID(int PositionId);
         Task<BaseResponse> EditDesignation(EditDesignationvm editDesignationvm);
-        
+        Task<BaseResponse> SendForgetPasswordLink(string useremail);
+        Task<BaseResponse> Reset_Forget_User_Password(ResetPasswordvm vm);
+        Task<BaseResponse> Updatepassword(Changepasswordvm updatepasswordvm);
+
+
     }
 }
