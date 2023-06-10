@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.RolesResponse;
+using PayhouseDragonFly.CORE.DTOs.loginvms;
+using PayhouseDragonFly.CORE.DTOs.Roles;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices;
 
@@ -20,7 +22,7 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         public RolesController(IRoleServices _roleService, ILoggeinUserServices loggeinuser)
         {
             _roleServices = _roleService;
-            _loggeinuser= loggeinuser;
+            _loggeinuser = loggeinuser;
 
 
         }
@@ -34,12 +36,12 @@ namespace PayhouseDragonFly.API.Controllers.Roles
             var roleclaimtrue = await _roleServices
                 .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
 
-            if (loggedinuser.RoleId >0)
+            if (loggedinuser.RoleId > 0)
             {
 
                 if (roleclaimtrue)
                 {
-                    return await  _roleServices.CreateRole(Rolename);
+                    return await _roleServices.CreateRole(Rolename);
                 }
             }
             else
@@ -59,7 +61,7 @@ namespace PayhouseDragonFly.API.Controllers.Roles
             var roleclaimtrue = await _roleServices
                 .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
 
-            if (loggedinuser.RoleId >0)
+            if (    loggedinuser.RoleId==1 || loggedinuser.RoleId==2 )
             {
 
                 if (roleclaimtrue)
@@ -82,7 +84,7 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         [Route("AssignUserToRole")]
         public async Task<RolesResponse> AssignUserToRole(string useremail, int roleid)
         {
-            return await _roleServices.AssignUserToRole(useremail,roleid);
+            return await _roleServices.AssignUserToRole(useremail, roleid);
 
         }
 
@@ -98,7 +100,7 @@ namespace PayhouseDragonFly.API.Controllers.Roles
             var roleclaimtrue = await _roleServices
                 .CheckClaimInRole(roleclaimnamename, loggedinuser.RoleId);
 
-            if (loggedinuser.RoleId >0)
+            if (loggedinuser.RoleId > 0)
             {
 
                 if (roleclaimtrue)
@@ -119,7 +121,7 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("AllClaims")]
-       
+
         public async Task<Rolesresponse> GetAllRolecLaims()
         {
             var roleclaimname = "CanViewRoleClaims";
@@ -127,7 +129,7 @@ namespace PayhouseDragonFly.API.Controllers.Roles
             var roleclaimtrue = await _roleServices
                 .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
 
-            if (loggedinuser.RoleId >0)
+            if (loggedinuser.RoleId > 0)
             {
 
                 if (roleclaimtrue)
@@ -190,9 +192,9 @@ namespace PayhouseDragonFly.API.Controllers.Roles
             else
             {
 
-                return new RoleClaimsResponse(false, "You have no permission access this","", null);
+                return new RoleClaimsResponse(false, "You have no permission access this", "", null);
             }
-            return new RoleClaimsResponse(false,"", "", null);
+            return new RoleClaimsResponse(false, "", "", null);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -218,11 +220,75 @@ namespace PayhouseDragonFly.API.Controllers.Roles
 
                 return new BaseResponse("130", "You have no permission access this", null);
             }
-            return new BaseResponse("140",  "", null);
+            return new BaseResponse("140", "", null);
 
 
         }
-    }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("Deleteroleclaim")]
+        public async Task<BaseResponse> DeleteRoleClaim(int ClaimId, int roleid)
+        {
+          return await _roleServices.DeleteRoleClaim(ClaimId, roleid);     
+        }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("AssignUserOtherRoles")]
+        public async Task<BaseResponse> AssignUserOtherRoles(otherRolesvm vm)
+        {
+            return await _roleServices.AssignUserOtherRoles(vm);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+
+        [HttpPost]
+        [Route("GetUserOtherRoles")]
+        public async Task<BaseResponse> GetUserOtherRoles(string userid)
+        {
+            return await _roleServices .GetUserOtherRoles(userid);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("DeleteRole")]
+        public async Task<BaseResponse> DeleteRole(string RoleName)
+        {
+            return await _roleServices.DeleteRole(RoleName);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("DeleteResponsibility")]
+        public async Task<BaseResponse> DeleteResponsibility(int ClaimId)
+        {
+            return await _roleServices.DeleteResponsibility(ClaimId);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetUserRoles")]
+        public async Task<BaseResponse> GetUserRoles(string userid)
+        {
+            return await _roleServices.GetUserRoles(userid);
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetRoleByUserId")]
+        public async Task<Rolesresponse> GetRoleByUserId(string userid)
+        {
+            return await _roleServices.GetRoleByUserId(userid);
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("Total_Users_With_Role")]
+        public async Task<Roles_User_CounterResponse> UsersWithRole(int roleid)
+        {
+            return await _roleServices.UsersWithRole(roleid);
+        }
+
+
+
+
+
+    }
 }
 

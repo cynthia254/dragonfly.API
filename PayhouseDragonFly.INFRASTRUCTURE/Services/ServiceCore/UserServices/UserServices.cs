@@ -4,11 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Asn1.X509;
 using PayhouseDragonFly.API.Controllers.User;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.resetpassword;
+using PayhouseDragonFly.CORE.DTOs.Department;
 using PayhouseDragonFly.CORE.DTOs.Designation;
 using PayhouseDragonFly.CORE.DTOs.EmaillDtos;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
@@ -68,7 +70,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
             _extraservices = extraservices;
             _emailServices = emailServices;
             _loggeinUserServices = loggeinUserServices;
-            _mathservices=mathservices;
+            _mathservices = mathservices;
 
         }
 
@@ -187,7 +189,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         //sent email to admins
 
                         //get all users
-                        var allusers = await scopedcontext.PayhouseDragonFlyUsers.Where(u=>u.RoleId==1).ToListAsync();
+                        var allusers = await scopedcontext.PayhouseDragonFlyUsers.Where(u => u.RoleId == 1).ToListAsync();
 
                         if (allusers == null)
                         {
@@ -201,19 +203,19 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                             var bodyofemail = new EmailbodyOnCreatedUser {
 
                                 AdminNames = onesuperadmin.FirstName + " " + onesuperadmin.LastName,
-                                ToEmail=onesuperadmin.Email,
-                                PayLoad=$"A new user {rv.FirstName} {rv.LastName} has been created on the system , kindly, log in and activate him or her",
-                                CreatedDate=onesuperadmin.DateCreated,
-                                UserName=onesuperadmin.UserName,
-                              };
-                          var resp=  await _emailServices.EmailOnCreatedUser(bodyofemail);
+                                ToEmail = onesuperadmin.Email,
+                                PayLoad = $"A new user {rv.FirstName} {rv.LastName} has been created on the system , kindly, log in and activate him or her",
+                                CreatedDate = onesuperadmin.DateCreated,
+                                UserName = onesuperadmin.UserName,
+                            };
+                            var resp = await _emailServices.EmailOnCreatedUser(bodyofemail);
 
                             _logger.LogInformation($"______||||||_____{resp}");
 
                         }
 
                         return new RegisterResponse("200", "Registered user successfully. Kindly wait for admin approval ", newuser);
-                      
+
                     }
                     else
                     {
@@ -273,8 +275,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     {
                         return new authenticationResponses("112", "Account Inactive.Kindly contact Admin", "", "", "", "");
                     }
-                   
-                   
+
+
                     if (identityUser != null)
                     {
                         var result =
@@ -336,7 +338,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 _logger.LogInformation("Error message on login : ", e.Message);
                 return new authenticationResponses("190", e.Message, "", "", "", "");
             }
-           
+
         }
 
         public async Task<BaseResponse> GetAllUsers()
@@ -413,7 +415,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         else
                         {
                             userslisted.UserActiveMessage = "InActive";
-                            
+
                         }
                         userslist.Add(userslisted);
 
@@ -591,6 +593,60 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
             }
 
 
+
+
+        }
+        public async Task<BaseResponse> DeleteDepartment(string DepartmentName)
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopecontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var departmentexists = await scopecontext.Departments.Where(x => x.DepartmentName == DepartmentName).FirstOrDefaultAsync();
+
+                    if (departmentexists == null)
+                    {
+                        return new BaseResponse("190", "Department does not exist ", null);
+                    }
+                    scopecontext.Remove(departmentexists);
+                    await scopecontext.SaveChangesAsync();
+
+                    return new BaseResponse("200", "Department deleted successfully", null);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse("130", ex.Message, null);
+            }
+
+
+        }
+        public async Task<BaseResponse> DeleteDesignation(string PositionName)
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopecontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var designationexists = await scopecontext.Designation.Where(x => x.PositionName == PositionName).FirstOrDefaultAsync();
+
+                    if (designationexists == null)
+                    {
+                        return new BaseResponse("190", "Designation does not exist ", null);
+                    }
+                    scopecontext.Remove(designationexists);
+                    await scopecontext.SaveChangesAsync();
+
+                    return new BaseResponse("200", "Designation deleted successfully", null);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse("130", ex.Message, null);
+            }
 
 
         }
@@ -1000,22 +1056,23 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                             _logger.LogInformation("_________________________user does not exist__________");
                         }
 
-                        //create email body
-
-                        var emailbody = new EmailbodyOnLeaveEnd
-                        {
-                            ToEmail = userexists.Email,
-                            Names = userexists.FirstName + " " + userexists.LastName,
-                            UserName = userexists.Email,
-                            LeaveEndDate = singleuserstatusobject.EndDate,
-                            PayLoad = "Reminder"
-
-                        };
 
                         //get one day before end of leave
 
                         if (currentdate.AddDays(1) == singleuserstatusobject.EndDate)
                         {
+
+                            //create email body
+
+                            var emailbody = new EmailbodyOnLeaveEnd
+                            {
+                                ToEmail = userexists.Email,
+                                Names = userexists.FirstName + " " + userexists.LastName,
+                                UserName = userexists.Email,
+                                LeaveEndDate = singleuserstatusobject.EndDate,
+                                PayLoad = "Reminder"
+
+                            };
                             //send mail if true
 
 
@@ -1039,38 +1096,46 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
         }
         public async Task<BaseResponse> ActivateUser(string useremail)
         {
-
-            // get user
-
-            var userexsists = await _authDbContext.PayhouseDragonFlyUsers.Where(x => x.UserName == useremail).FirstOrDefaultAsync();
-            if (userexsists == null)
+            try
             {
 
-                return new BaseResponse("130", "userid does not exist", null);
+                // get user
+
+                var userexsists = await _authDbContext.PayhouseDragonFlyUsers.Where(x => x.UserName == useremail).FirstOrDefaultAsync();
+                if (userexsists == null)
+                {
+
+                    return new BaseResponse("130", "userid does not exist", null);
+                }
+
+                userexsists.UserActive = true;
+                userexsists.StatusDescription = null;
+                userexsists.ReasonforStatus = "";
+                _authDbContext.Update(userexsists);
+                await _authDbContext.SaveChangesAsync();
+                var getuseronstatustable = await _authDbContext.UserStatusTable.Where(x => x.userId == userexsists.Id).FirstOrDefaultAsync();
+                if (getuseronstatustable == null)
+                {
+
+                    _logger.LogInformation("_________________________Nothing to remove from  user status table________________________|||___");
+                }
+                else
+                {
+                    _authDbContext.Remove(getuseronstatustable);
+                    await _authDbContext.SaveChangesAsync();
+                }
+
+
+
+
+
+                return new BaseResponse("200", $"Successfully activated user {userexsists.FirstName}  {userexsists.LastName}", null);
             }
+            catch (Exception ex)
+            {
+                return new BaseResponse("150", ex.Message, null);
 
-            userexsists.UserActive = true;
-            userexsists.StatusDescription = "";
-            userexsists.ReasonforStatus = "";
-
-
-
-
-            _authDbContext.Update(userexsists);
-            await _authDbContext.SaveChangesAsync();
-
-
-
-            var getuseronstatustable = await _authDbContext.UserStatusTable.Where(x => x.userId == userexsists.Id).FirstOrDefaultAsync();
-
-            _authDbContext.Remove(getuseronstatustable);
-            await _authDbContext.SaveChangesAsync();
-
-
-
-
-
-            return new BaseResponse("200", $"Successfully activated user {userexsists.FirstName}  {userexsists.LastName}", null);
+            }
 
 
         }
@@ -1257,10 +1322,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     string sixDigitNumber = randNum.ToString("D6");
                     //end random numbers functions
 
-                    var tokenexists =  _mathservices.GenerateTokenString().Result + sixDigitNumber;
+                    var tokenexists = _mathservices.GenerateTokenString().Result + sixDigitNumber;
                     userexists.ForgetpasswordVerificationToken = tokenexists;
 
-                     scopedcontext.Update(userexists);
+                    scopedcontext.Update(userexists);
                     await scopedcontext.SaveChangesAsync();
 
 
@@ -1270,7 +1335,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         UserName = userexists.FirstName + " " + userexists.LastName,
                         PayLoad = tokenexists
                     };
-                   var resp=  await _emailServices.SendForgotPasswordLink(emailsent);
+                    var resp = await _emailServices.SendForgotPasswordLink(emailsent);
 
                     _logger.LogInformation($"________response on email sent on link _____{resp}");
 
@@ -1300,17 +1365,17 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                             .Where(u => u.ForgetpasswordVerificationToken == vm.verificationtoken)
                             .FirstOrDefaultAsync();
 
-                    if(userexists == null) 
+                    if (userexists == null)
                     {
-                      return new BaseResponse("130", "user does not exist",null);
+                        return new BaseResponse("130", "user does not exist", null);
                     }
 
                     //add new password
                     userexists.PasswordHash = _userManager
                             .PasswordHasher
                             .HashPassword(userexists, vm.Password);
-                     _authDbContext.Update(userexists);
-                    await _authDbContext.SaveChangesAsync(); 
+                    _authDbContext.Update(userexists);
+                    await _authDbContext.SaveChangesAsync();
 
                     return new BaseResponse("200", "Password changed successfully", null);
 
@@ -1336,7 +1401,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 if (user == null)
                 {
                     return new BaseResponse("650", "The user cannot be found", null);
-                        
+
                 }
 
                 if (updatepasswordvm.Password != updatepasswordvm.Renterpassord)
@@ -1352,13 +1417,13 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 {
                     await _userManager.UpdateAsync(user);
 
-                    return new BaseResponse("200", "Email reset successfully", null);
+                    return new BaseResponse("200", "Password reset successfully", null);
 
 
                 }
                 else
                 {
-                    return new BaseResponse("130", "Password no changed successfully", null);
+                    return new BaseResponse("130", "Password not changed successfully", null);
 
                 }
             }
@@ -1366,20 +1431,183 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
             {
 
                 return new BaseResponse("134", ex.Message, null);
-                    
+
             }
 
-           
+
         }
+        public async Task<BaseResponse> EditDepartment(EditDepartmentvms editDepartmentvms)
+        {
+            try
+            {
+
+                using (var scope = _scopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var departmentexists = await scopedcontext.Departments.Where(u => u.Departnmentid == editDepartmentvms.Departnmentid).FirstOrDefaultAsync();
+
+                    if (departmentexists == null)
+                    {
+
+                        return new BaseResponse("180", "Department does not exist", null);
+                    }
+
+                    if (editDepartmentvms.DepartmentName == "string")
+                    {
+                        departmentexists.DepartmentName = departmentexists.DepartmentName;
+
+                    }
+                    else
+                    {
+                        departmentexists.DepartmentName = editDepartmentvms.DepartmentName;
+                    }
+
+
+                    if (editDepartmentvms.DepartmentDescription == "string")
+                    {
+                        departmentexists.DepartmentDescription = departmentexists.DepartmentDescription;
+                        _logger.LogInformation("Nothing to show here");
+                    }
+                    else
+                    {
+                        departmentexists.DepartmentDescription = editDepartmentvms.DepartmentDescription;
+                    }
+
+
+
+                    scopedcontext.Update(departmentexists);
+                    await scopedcontext.SaveChangesAsync();
+
+                    return new BaseResponse("200", "Sucessfully updated department details", departmentexists);
+
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                return new BaseResponse("130", ex.Message, null);
+            }
+        }
+        public async Task<BaseResponse> SearchForUsers(string search_query)
+        {
+
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var usersexists = await scopedcontext.PayhouseDragonFlyUsers.Where
+                        (u => EF.Functions.Like(u.FirstName, $"%{search_query}%") ||
+                        EF.Functions.Like(u.LastName, $"%{search_query}%") ||
+                        EF.Functions.Like(u.DepartmentName, $"%{search_query}%")||
+                        EF.Functions.Like(u.Email, $"%{search_query}%")||
+                        EF.Functions.Like(u.StatusDescription, $"%{search_query}%") ||
+                        EF.Functions.Like(u.ReasonforStatus, $"%{search_query}%") ||
+                        EF.Functions.Like(u.UserStatus, $"%{search_query}%")
+
+                        ).ToListAsync();
+                                           
+                    if (usersexists == null)
+                        return new BaseResponse("","","");
 
 
 
 
 
+                      List<RegistrationOutputVm> userslist = new List<RegistrationOutputVm>();
 
 
+                    foreach (var user in usersexists)
+                    {
+                        var userslisted = new RegistrationOutputVm()
+                        {
+
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Salutation = user.Salutation,
+                            AdditionalInformation = user.AdditionalInformation,
+                            BusinessUnit = user.BusinessUnit,
+                            Site = user.Site,
+                            County = user.County,
+                            DepartmentName = user.DepartmentName,
+                            Address = user.Address,
+                            ClientName = user.ClientName,
+                            EmailConfirmed = user.EmailConfirmed,
+                            VerificationTime = user.VerificationTime,
+                            VerificationToken = user.VerificationToken,
+                            AnyMessage = user.AnyMessage,
+                            DateCreated = user.DateCreated,
+                            RoleId = user.RoleId,
+                            Position = user.Position,
+                            DepartmentDescription = user.DepartmentDescription,
+                            Email = user.Email,
+                            StatusReason = user.StatusReason,
+                            UserId = user.Id,
+                            StatusDescription = user.StatusDescription,
+                            ReasonforStatus = user.ReasonforStatus,
+                            PositionName = user.PositionName,
+                            PositionDescription = user.PostionDescription
+
+
+
+
+
+                        };
+                        if (user.EmailConfirmed)
+                        {
+                            userslisted.UserStatus = "Active";
+                        }
+                        else if (!user.EmailConfirmed)
+                        {
+                            userslisted.UserStatus = "Inactive";
+
+                        }
+                        else
+                        {
+                            userslisted.UserStatus = "NOTHING";
+                        }
+
+
+                        if (user.UserActive)
+                        {
+                            userslisted.UserActiveMessage = "Active";
+                        }
+                        else
+                        {
+                            userslisted.UserActiveMessage = "InActive";
+
+                        }
+                        userslist.Add(userslisted);
+
+                    }
+
+
+                    return new BaseResponse("200", "Successfully queried", userslist);
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                return new BaseResponse("290", ex.Message, null);
+            }
+        }
     }
+
+
+
+
+
+
+
 }
+
 
 
 

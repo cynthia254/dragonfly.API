@@ -39,8 +39,8 @@ namespace PayhouseDragonFly.CORE.Models.UserRegistration
 
         public string? ReasonforStatus { get; set; }
 
-
         public string? ForgetpasswordVerificationToken { get; set; } = "NotChanged";
+
 
 
 

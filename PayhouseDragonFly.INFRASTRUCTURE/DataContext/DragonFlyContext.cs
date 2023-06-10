@@ -5,6 +5,7 @@ using PayhouseDragonFly.CORE.Models.departments;
 using PayhouseDragonFly.CORE.Models.Designation;
 using PayhouseDragonFly.CORE.Models.Roles;
 using PayhouseDragonFly.CORE.Models.statusTable;
+using PayhouseDragonFly.CORE.Models.Stock;
 using PayhouseDragonFly.CORE.Models.TicketRegistration;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using System;
@@ -37,9 +38,18 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.DataContext
         public DbSet<UserStatusTable> UserStatusTable { get; set; }
         public DbSet<Designation> Designation { get; set; }
         public DbSet<RoleClaimsTable> RoleClaimsTable { get; set; }
-
+        public DbSet<OtherRoles> OtherRoles { get; set; }
         public  DbSet<Claim_Role_Map> Claim_Role_Map { get; set; }
-
+        public DbSet<AddBrand> AddBrand { get; set; }
+        public DbSet<AddItem> AddItem { get; set; }
+        public DbSet<AddStock>AddStock { get; set; }
+        public DbSet<AddCustomer> Customer { get; set; }
+        public DbSet<AddSupplier> Suppliers { get; set; }
+        public DbSet<AddSalesOrder>Sales { get; set; }
+        public DbSet<AddPurchaseOrder>Purchases { get; set; }
+        public DbSet<purchaseStatus> PurchaseStatusTable { get; set; }
+        public DbSet<AddReturnedStatus> ReturnedStatusTable { get; set;}
+        public DbSet<AddReturnedStock> ReturnedStock { get; set; }
 
     }
 }

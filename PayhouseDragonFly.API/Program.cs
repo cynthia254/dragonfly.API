@@ -24,6 +24,8 @@ using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices.jobs;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices.RoleChecker;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices.IMathServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.ExtraServices.MathServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStockServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
@@ -88,6 +90,7 @@ builder.Services.AddScoped<IRoleServices, RoleServices>();
 builder.Services.AddScoped<ILoggeinUserServices, LoggeinUserServices>();
 builder.Services.AddScoped<IRoleChecker,RoleChecker>();
 builder.Services.AddScoped<IMathServices, MathServices>();
+builder.Services.AddScoped<IStockServices, StockServices>();
 builder.Services
     .AddAuthentication(opt =>
     {

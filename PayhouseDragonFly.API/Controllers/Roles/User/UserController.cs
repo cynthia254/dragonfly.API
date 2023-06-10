@@ -4,6 +4,7 @@ using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.resetpassword;
+using PayhouseDragonFly.CORE.DTOs.Department;
 using PayhouseDragonFly.CORE.DTOs.Designation;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
@@ -28,7 +29,7 @@ namespace PayhouseDragonFly.API.Controllers.User
 
         private readonly IRoleServices _roleservices;
         public UserController(
-            IUserServices userServices, 
+            IUserServices userServices,
             IRoleChecker rolechecker,
             IRoleServices roleservices,
             ILoggeinUserServices loggeinuser
@@ -36,8 +37,8 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             _userServices = userServices;
             _rolechecker = rolechecker;
-            _roleservices= roleservices;
-            _loggeinuser= loggeinuser;
+            _roleservices = roleservices;
+            _loggeinuser = loggeinuser;
 
         }
 
@@ -47,7 +48,7 @@ namespace PayhouseDragonFly.API.Controllers.User
         [Route("Authenticate")]
         public async Task<authenticationResponses> Authenticate(loginvm loggedinuser)
         {
-          
+
             return await _userServices.Authenticate(loggedinuser);
         }
 
@@ -57,8 +58,8 @@ namespace PayhouseDragonFly.API.Controllers.User
         public async Task<RegisterResponse> RegisterUser(RegisterVms rv)
         {
             var roleclaimname = "CanCreateUsers";
-            var loggedinuser = await  _loggeinuser.LoggedInUser();
-            var roleclaimtrue =await  _roleservices           
+            var loggedinuser = await _loggeinuser.LoggedInUser();
+            var roleclaimtrue = await _roleservices
                 .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
 
             if (loggedinuser.RoleId > 0)
@@ -94,7 +95,7 @@ namespace PayhouseDragonFly.API.Controllers.User
             var roleclaimtrue = await _roleservices
                 .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
 
-            
+
 
             if (loggedinuser.RoleId > 0)
             {
@@ -111,7 +112,7 @@ namespace PayhouseDragonFly.API.Controllers.User
             }
             else
             {
-                return new BaseResponse("120", "You have no permission access this", null); 
+                return new BaseResponse("120", "You have no permission access this", null);
             }
             return new BaseResponse("", "", null);
 
@@ -209,7 +210,7 @@ namespace PayhouseDragonFly.API.Controllers.User
             return await _userServices.GetUserById(userId);
 
         }
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("Add_Department")]
         public async Task<BaseResponse> AddDepartment(AddDepartmentvms addDepartmentvms)
@@ -250,7 +251,7 @@ namespace PayhouseDragonFly.API.Controllers.User
             var roleclaimtrue = await _roleservices
                 .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
 
-            if (loggedinuser.RoleId >0)
+            if (loggedinuser.RoleId > 0)
             {
 
                 if (roleclaimtrue)
@@ -279,7 +280,7 @@ namespace PayhouseDragonFly.API.Controllers.User
 
             return await _userServices.TestMail(testmail);
         }
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("Getdepartmentbyid")]
         public async Task<BaseResponse> GetDepartmentByID(int departmentid)
@@ -287,14 +288,19 @@ namespace PayhouseDragonFly.API.Controllers.User
             var roleclaimname = "CanSeeRelatedDepartment";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
             var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+               .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
 
-            if (loggedinuser.RoleId >0)
+            if (loggedinuser.RoleId > 0)
             {
 
                 if (roleclaimtrue)
                 {
                     return await _userServices.GetDepartmentByID(departmentid);
+
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
 
                 }
             }
@@ -305,6 +311,7 @@ namespace PayhouseDragonFly.API.Controllers.User
             }
             return new BaseResponse("", "", null);
         }
+    
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
@@ -549,8 +556,58 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             return await _userServices.Reset_Forget_User_Password(vm);
         }
+        
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("EditDepartment")]
+        public async Task<BaseResponse> EditDepartment(EditDepartmentvms editDepartmentvms)
+        {
+            var roleclaimname = "CanEditDepartment";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+
+            if (loggedinuser.RoleId > 0)
+            {
+
+                if (roleclaimtrue)
+                {
+                    return await _userServices.EditDepartment(editDepartmentvms);
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
+                }
+            }
+            else
+            {
+                return new BaseResponse("120", "You have no permission access this", null);
+            }
+            return new BaseResponse("", "", null);
+
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("DeleteDepartment")]
+        public async Task<BaseResponse> DeleteDepartment(string DepartmentName)
+        {
+            return await _userServices.DeleteDepartment(DepartmentName);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("DeleteDesignation")]
+        public async Task<BaseResponse> DeleteDesignation(string PositionName)
+        {
+            return await _userServices.DeleteDesignation(PositionName);
+        }
 
 
+        [HttpPost]
+        [Route("SearchUsers")]
+        public async Task<BaseResponse> SearchForUsers(string search_query)
+        {
+             return await  _userServices.SearchForUsers(search_query);
+        }
 
 
     }

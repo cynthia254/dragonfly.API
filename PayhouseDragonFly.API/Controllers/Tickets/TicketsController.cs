@@ -137,9 +137,34 @@ namespace PayhouseDragonFly.API.Controllers.Tickets
 
         public async Task<BaseResponse> GetTicketById(int ticketid)
         {
-            return await _ticketServices.GetTicketById(ticketid);
 
+            var roleclaimname = "CanGetTicketById";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+
+            if (loggedinuser.RoleId > 0)
+            {
+
+                if (roleclaimtrue)
+                {
+                    return await _ticketServices.GetTicketById(ticketid);
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
+
+                }
+            }
+            else
+            {
+
+                return new BaseResponse("120", "You have no permission access this", null);
+            }
+            return new BaseResponse("", "", null);
         }
+
+    
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]

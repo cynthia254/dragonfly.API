@@ -11,6 +11,8 @@ namespace PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse
         public bool IsTrue { get; set; }
         public string Message { get; set; }
         public object Body { get; set; }
+        public string V1 { get; }
+        public string V2 { get; }
 
         public RolesResponse(bool istrue, string message, object body)
         {
@@ -19,6 +21,12 @@ namespace PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse
 
             Body = body;   
 
+        }
+
+        public RolesResponse(string v1, string v2)
+        {
+            V1 = v1;
+            V2 = v2;
         }
     }
 }
