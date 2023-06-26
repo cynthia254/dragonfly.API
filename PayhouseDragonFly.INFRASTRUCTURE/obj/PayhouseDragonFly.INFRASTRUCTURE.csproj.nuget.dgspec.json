@@ -107,6 +107,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.101.0, )"
+            },
             "Hosting.Extensions.Quartz": {
               "target": "Package",
               "version": "[1.1.1, )"

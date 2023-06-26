@@ -68,16 +68,16 @@ builder.Services.AddSwaggerGen(c =>
 
 //quartz jobs 
 
-builder.Services.AddQuartz(q =>
-{
-    q.UseMicrosoftDependencyInjectionJobFactory();
-    var emailsentonleaveend = new JobKey("notifyuseronleaveend");
-    q.AddJob<notifyuseronleaveend>(z => z.WithIdentity(emailsentonleaveend));
-    q.AddTrigger(y => y.ForJob(emailsentonleaveend)
-    .WithIdentity("notifyuseronleaveend-trigger")
-    .WithCronSchedule("0/1 * * * * ?"));
-});
-builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+//builder.Services.AddQuartz(q =>
+//{
+//    q.UseMicrosoftDependencyInjectionJobFactory();
+//    var emailsentonleaveend = new JobKey("notifyuseronleaveend");
+//    q.AddJob<notifyuseronleaveend>(z => z.WithIdentity(emailsentonleaveend));
+//    q.AddTrigger(y => y.ForJob(emailsentonleaveend)
+//    .WithIdentity("notifyuseronleaveend-trigger")
+//    .WithCronSchedule("0/1 * * * * ?"));
+//});
+//builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 //end quartz jobs
 

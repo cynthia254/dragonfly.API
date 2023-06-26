@@ -14,6 +14,7 @@ namespace PayhouseDragonFly.CORE.DTOs.Stock
         public int Quantity { get; set; }
         public int ReOrderLevel { get; set; }
         public int BuyingPrice { get; set; }
+        public string ReorderRequired { get; set; }
         public int SellingPrice { get; set; }
         public int AvailableStock { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.Now;
@@ -26,5 +27,8 @@ namespace PayhouseDragonFly.CORE.DTOs.Stock
         public int OpeningStock { get; set; }
         public string Comments { get; set; }
         public string Department { get; set; }
+        public int StockOut { get; set; }
+        public int TotalReturnedStock { get; set; }
+        public int StockIn { get; set; }
     }
 }

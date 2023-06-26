@@ -9,5 +9,11 @@ namespace PayhouseDragonFly.CORE.DTOs.Stock
     public class AddItemvm
     {
         public string ItemName { get; set; }
+        public string Category { get; set; }
+        public string BrandName { get; set; }
+        public int ReOrderLevel { get; set; }
+        public string Currency { get; set; }
+        public int IndicativePrice { get; set; }
+        public string ItemDescription { get; set; }
     }
 }

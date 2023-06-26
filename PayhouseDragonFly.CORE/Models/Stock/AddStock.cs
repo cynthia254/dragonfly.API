@@ -24,6 +24,10 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public int StockInTransit { get; set; }
         public string SalesCurrency { get; set; }
         public int OpeningStock { get; set; }
+        public string ReorderRequired { get; set; }
+        public int StockOut { get; set; }
+        public int TotalReturnedStock { get; set; }
+        public int StockIn { get; set; }
 
 
 

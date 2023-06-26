@@ -350,6 +350,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                     var scopedcontent = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
 
                     var allusers = await scopedcontent.PayhouseDragonFlyUsers.OrderByDescending(x => x.DateCreated).ToListAsync();
+                   
                     if (allusers == null)
                     {
                         return new BaseResponse("120", "No users found", null);
@@ -1008,7 +1009,6 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
                     }
 
-
                     scopedcontext.Update(userexists);
                     await scopedcontext.SaveChangesAsync();
 
@@ -1598,6 +1598,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 return new BaseResponse("290", ex.Message, null);
             }
         }
+
+
+
     }
 
 

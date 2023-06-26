@@ -266,6 +266,27 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.ToTable("AddBrand");
                 });
 
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.AddCategory", b =>
+                {
+                    b.Property<int>("CategoryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryID"));
+
+                    b.Property<string>("CategoryDesc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CategoryID");
+
+                    b.ToTable("Category");
+                });
+
             modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.AddCustomer", b =>
                 {
                     b.Property<int>("CustomerId")
@@ -303,13 +324,96 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemID"));
 
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("IndicativePrice")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ItemDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ItemName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ReOrderLevel")
+                        .HasColumnType("int");
+
                     b.HasKey("ItemID");
 
                     b.ToTable("AddItem");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.AddPart", b =>
+                {
+                    b.Property<int>("PartID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PartID"));
+
+                    b.Property<string>("PartDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PartName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PartID");
+
+                    b.ToTable("AddPart");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.AddProductDetails", b =>
+                {
+                    b.Property<int>("BatchID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BatchID"));
+
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("IMEI1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IMEI2")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ItemID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("WarrantyEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("WarrantyStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("BatchID");
+
+                    b.ToTable("AddProductDetails");
                 });
 
             modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.AddPurchaseOrder", b =>
@@ -484,6 +588,27 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.ToTable("Sales");
                 });
 
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.AddSpareParts", b =>
+                {
+                    b.Property<int>("PartID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PartID"));
+
+                    b.Property<string>("PartDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PartName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PartID");
+
+                    b.ToTable("AddSpareParts");
+                });
+
             modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.AddStock", b =>
                 {
                     b.Property<int>("StockId")
@@ -522,6 +647,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.Property<int>("ReOrderLevel")
                         .HasColumnType("int");
 
+                    b.Property<string>("ReorderRequired")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SalesCurrency")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -533,7 +662,16 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("StockIn")
+                        .HasColumnType("int");
+
                     b.Property<int>("StockInTransit")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StockOut")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalReturnedStock")
                         .HasColumnType("int");
 
                     b.HasKey("StockId");
@@ -568,6 +706,282 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.HasKey("SupplierId");
 
                     b.ToTable("Suppliers");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.InvoiceLines", b =>
+                {
+                    b.Property<int>("BatchID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BatchID"));
+
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UnitPrice")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Warranty")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("WarrantyEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("WarrantyStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("BatchID");
+
+                    b.ToTable("InvoiceLines");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.InvoiceLinesDetails", b =>
+                {
+                    b.Property<int>("InvoiceLineId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InvoiceLineId"));
+
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference_Number")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalUnitPrice")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UnitPrice")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Warranty")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("WarrantyEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("WarrantyStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("InvoiceLineId");
+
+                    b.ToTable("InvoiceLinesDetails");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.InvoiceNo", b =>
+                {
+                    b.Property<int>("InvoiceKey")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InvoiceKey"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("InvoieNo")
+                        .HasColumnType("int");
+
+                    b.HasKey("InvoiceKey");
+
+                    b.ToTable("InvoiceNo");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.Invoicing.Invoice_Item_Quantity", b =>
+                {
+                    b.Property<int>("Invoic_item_quantity_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Invoic_item_quantity_id"));
+
+                    b.Property<string>("Invoce_No")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Invoice_quantity_Unique_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Invoic_item_quantity_id");
+
+                    b.ToTable("Invoice_Item_Quantity");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.Invoicing.Item_Numbering_Stock", b =>
+                {
+                    b.Property<int>("invoice_numbering_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("invoice_numbering_id"));
+
+                    b.Property<string>("Invoice_quantity_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Product_No")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("invoice_numbering_id");
+
+                    b.ToTable("Item_Numbering_Stock");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.ProductNumbering", b =>
+                {
+                    b.Property<int>("ProductNumberID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductNumberID"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("NumberValue")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference_Number")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ProductNumberID");
+
+                    b.ToTable("ProductNumbering");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.StockIn", b =>
+                {
+                    b.Property<int>("StockID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StockID"));
+
+                    b.Property<DateTime>("InvoiceDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("LPODate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LPONumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StockInDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SupplierName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("StockID");
+
+                    b.ToTable("StockIn");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.lpoNo", b =>
+                {
+                    b.Property<int>("LpoKey")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LpoKey"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LpoNo")
+                        .HasColumnType("int");
+
+                    b.HasKey("LpoKey");
+
+                    b.ToTable("LPO_No");
                 });
 
             modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.purchaseStatus", b =>

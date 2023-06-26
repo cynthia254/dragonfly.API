@@ -21,6 +21,10 @@ namespace PayhouseDragonFly.CORE.DTOs.Stock
  
         public string SalesCurrency { get; set; }
         public int OpeningStock { get; set; }
+        public string ReorderRequired { get; set; } = "Nothing to show here";
+        public int StockOut { get; set; }
+        public int TotalReturnedStock { get; set; }
+        public int StockIn { get; set; }
 
 
 

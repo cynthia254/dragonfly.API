@@ -1,6 +1,7 @@
 ﻿using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.StockResponse;
 using PayhouseDragonFly.CORE.DTOs.Stock;
+using PayhouseDragonFly.CORE.DTOs.Stock.Invoicing_vm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,8 +38,43 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStoc
          Task<StockResponse> AddReturnedStock(AddReturnedStockvm addReturnedStockvm);
         Task<StockResponse> GetAllReturnedStock();
         Task<StockResponse> SearchForStock(string search_query);
+       Task<StockResponse> SearchForStockIn(string search_query);
+       Task<StockResponse> SearchForStockOut(string search_query);
+        Task<StockResponse> SearchForCustomer(string search_query);
+        Task<StockResponse> SearchForSupplier(string search_query);
+        Task<StockResponse> EditSales(editSalesvm salesvm);
+        Task<StockResponse> DeleteStockOut(int salesId);
+        Task<StockResponse> EditCustomer(EditCustomervm editCustomervm);
+         Task<StockResponse> GetCustomerById(int customerId);
+         Task<StockResponse> GetSupplierById(int supplierId);
+        Task<StockResponse> EditSupplier(editSuppliervm suppliervm);
+         Task<StockResponse> GetBrandById(int BrandId);
+     Task<StockResponse> GetItemsById(int ItemId);
+        Task<StockResponse> EditBrand(EditBrandvm editBrandvm);
+         Task<StockResponse> EditItem(EditItemvm editItemvm);
+        Task<StockResponse> EditStockIn(EditPurchasevm editPurchasevm);
+        Task<StockResponse> GenerateExcel();
+        Task<StockResponse> AddCategory(AddCategoryvm addCategoryvm);
+        Task<StockResponse> GetAllCategory();
+         Task<StockResponse> AddInvoiceDetails(StockInvm stockInvm);
+        Task<StockResponse> GetInvoiceDetails();
+       Task<StockResponse> AddBatchDetails(AddBatchDetailsvm addBatchDetailsvm);
+         Task<StockResponse> GetInvoiceLines();
 
-
+         Task<StockResponse> AddProductDetails(AddProductDetailvm addProductDetailvm);
+         Task<StockResponse> GetProductDetails();
+         Task<StockResponse> GetInvoiceByNumber(string InvoiceNumber);
+        Task<StockResponse> AddSparePart(AddPartvm addPartvm);
+       Task<StockResponse> GetAllParts();
+        Task<StockResponse> AddPartsSpare(AddSparePartvm addSparePartvm);
+        Task<StockResponse> GetAllSpareParts();
+         Task<StockResponse> Add_Invoice_Item_Quantity(invoice_item_quantity_vm vm);
+        Task<string> GetGeneratedref();
+        Task<StockResponse> GetInvoiceLinByNumber(string invoiceNumber);
+         Task<StockResponse> GetInvoiceItemByID(int invoicelineId);
+        Task<StockResponse> GetProductDetailsbyid(int itemID);
+        Task<StockResponse> GetProduct_Numbers_ByReference(string reference);
+        Task<StockResponse> GetProduvctLineyId(int product_line_id);
 
     }
 }
