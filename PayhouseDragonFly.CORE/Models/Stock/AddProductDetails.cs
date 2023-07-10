@@ -20,5 +20,8 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public DateTime WarrantyStartDate { get; set; }
         public DateTime WarrantyEndDate { get; set;
         }
+        public string ProductStatus { get; set; } = "INCOMPLETE";
+
+
     }
 }

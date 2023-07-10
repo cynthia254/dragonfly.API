@@ -15,5 +15,6 @@ namespace PayhouseDragonFly.CORE.DTOs.Stock
         public string Currency { get; set; }
         public int IndicativePrice { get; set; }
         public string ItemDescription { get; set; }
+
     }
 }

@@ -44,6 +44,10 @@
             "Microsoft.Extensions.Identity.Stores": {
               "target": "Package",
               "version": "[7.0.5, )"
+            },
+            "NPOI": {
+              "target": "Package",
+              "version": "[2.6.0, )"
             }
           },
           "imports": [

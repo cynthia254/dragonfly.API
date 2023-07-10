@@ -29,5 +29,7 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public string InvoiceNumber { get; set; }
         public  int TotalUnitPrice { get; set; }
         public  string Reference_Number { get; set; }
+       
     }
+    
 }

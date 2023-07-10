@@ -1,4 +1,6 @@
-﻿using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.StockResponse;
 using PayhouseDragonFly.CORE.DTOs.Stock;
 using PayhouseDragonFly.CORE.DTOs.Stock.Invoicing_vm;
@@ -75,6 +77,11 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStoc
         Task<StockResponse> GetProductDetailsbyid(int itemID);
         Task<StockResponse> GetProduct_Numbers_ByReference(string reference);
         Task<StockResponse> GetProduvctLineyId(int product_line_id);
-
+        Task<StockResponse> SearchForInvoice(string search_query);
+         Task<StockResponse> SearchForItem(string search_query);
+         Task<StockResponse> GetItemsbyBrandName(string BrandName);
+        Task<StockResponse> SearchForInvoiceLines(string search_query);
+        Task<StockResponse> UploadData([FromBody] List<uploadDatavm> data);
+         Task<StockResponse> UploadingData(IFormFile file);
     }
 }

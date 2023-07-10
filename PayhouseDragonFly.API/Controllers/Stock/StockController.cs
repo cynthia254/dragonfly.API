@@ -425,6 +425,45 @@ namespace PayhouseDragonFly.API.Controllers.Stock
             return await _stockServices.GetProduvctLineyId(product_line_id);
         }
 
+        [HttpPost]
+        [Route("SearchInvoice")]
+        public async Task<StockResponse> SearchForInvoice(string search_query)
+        {
+            return await _stockServices.SearchForInvoice(search_query);
+        }
+        [HttpPost]
+        [Route("SearchItem")]
+        public async Task<StockResponse> SearchForItem(string search_query)
+        {
+            return await _stockServices.SearchForItem(search_query);
+        }
+        [HttpPost]
+        [Route("GettingItemByBrandName")]
+        public async Task<StockResponse> GetItemsbyBrandName(string BrandName)
+        {
+            return await _stockServices.GetItemsbyBrandName(BrandName);
+        }
+        [HttpPost]
+        [Route("SearchInvoiceLines")]
+        public async Task<StockResponse> SearchForInvoiceLines(string search_query)
+        {
+            return await _stockServices.SearchForInvoiceLines(search_query);
+        }
+        [HttpPost]
+        [Route("upload_bulk")]
+        public async Task<StockResponse> UploadData([FromBody] List<uploadDatavm> data)
+        {
+            return await _stockServices.UploadData(data);
+        }
+        [HttpPost]
+        [Route("uploading")]
+        public async Task<StockResponse> UploadingData(IFormFile file)
+        {
+            return await _stockServices.UploadingData(file);
+        }
+
+
+
 
     }
 }

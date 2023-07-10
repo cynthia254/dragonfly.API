@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,15 +11,18 @@ using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.authresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.resetpassword;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.StockResponse;
 using PayhouseDragonFly.CORE.DTOs.Department;
 using PayhouseDragonFly.CORE.DTOs.Designation;
 using PayhouseDragonFly.CORE.DTOs.EmaillDtos;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.RegisterVms;
+using PayhouseDragonFly.CORE.DTOs.Stock;
 using PayhouseDragonFly.CORE.DTOs.userStatusvm;
 using PayhouseDragonFly.CORE.Models.departments;
 using PayhouseDragonFly.CORE.Models.Designation;
 using PayhouseDragonFly.CORE.Models.statusTable;
+using PayhouseDragonFly.CORE.Models.Stock;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices;
@@ -1598,9 +1602,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 return new BaseResponse("290", ex.Message, null);
             }
         }
-
-
-
+        
     }
 
 
