@@ -10,6 +10,7 @@
     <PackageReference Include="ClosedXML" Version="0.101.0" />
     <PackageReference Include="DotNetCore.NPOI" Version="1.2.3" />
     <PackageReference Include="Hosting.Extensions.Quartz" Version="1.1.1" />
+    <PackageReference Include="iTextSharp" Version="5.5.13.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">
@@ -26,6 +27,7 @@
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.6.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
+    <PackageReference Include="ZXing.Net" Version="0.16.9" />
   </ItemGroup>
 
   <ItemGroup>

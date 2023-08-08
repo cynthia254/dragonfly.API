@@ -13,6 +13,7 @@ namespace PayhouseDragonFly.CORE.ConnectorClasses.Response.StockResponse
         public object Body { get; set; }
 
 
+
         public StockResponse(Boolean isTrue,string Message,object Body) 
         { 
             this.isTrue = isTrue;

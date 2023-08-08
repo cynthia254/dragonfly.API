@@ -227,3 +227,9 @@ C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.API\bi
 C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\EPPlus.dll
 C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\EPPlus.Interfaces.dll
 C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\EPPlus.System.Drawing.dll
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\zxing.dll
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\PdfSharp.Charting.dll
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\PdfSharp.dll
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\de\PdfSharp.Charting.resources.dll
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\de\PdfSharp.resources.dll
+C:\Users\user.DESKTOP-OMQ89VA\Desktop\PayhouseDragonFly\PayhouseDragonFly.API\bin\Debug\net6.0\itextsharp.dll

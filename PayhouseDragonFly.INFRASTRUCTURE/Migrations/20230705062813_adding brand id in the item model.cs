@@ -1,29 +1,29 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿////using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
+////#nullable disable
 
-namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
-{
-    /// <inheritdoc />
-    public partial class addingbrandidintheitemmodel : Migration
-    {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<int>(
-                name: "BrandID",
-                table: "AddItem",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
-        }
+////namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
+////{
+////    /// <inheritdoc />
+////    public partial class addingbrandidintheitemmodel : Migration
+////    {
+////        /// <inheritdoc />
+////        protected override void Up(MigrationBuilder migrationBuilder)
+////        {
+////            migrationBuilder.AddColumn<int>(
+////                name: "BrandID",
+////                table: "AddItem",
+////                type: "int",
+////                nullable: false,
+////                defaultValue: 0);
+////        }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "BrandID",
-                table: "AddItem");
-        }
-    }
-}
+////        /// <inheritdoc />
+////        protected override void Down(MigrationBuilder migrationBuilder)
+////        {
+////            migrationBuilder.DropColumn(
+////                name: "BrandID",
+////                table: "AddItem");
+////        }
+////    }
+////}

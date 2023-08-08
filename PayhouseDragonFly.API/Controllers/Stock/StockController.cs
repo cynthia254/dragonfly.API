@@ -5,7 +5,10 @@ using PayhouseDragonFly.CORE.ConnectorClasses.Response.StockResponse;
 using PayhouseDragonFly.CORE.DTOs.Stock;
 using PayhouseDragonFly.CORE.DTOs.Stock.Invoicing_vm;
 using PayhouseDragonFly.CORE.Models.Stock;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices.RoleChecker;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStockServices;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices;
 
 namespace PayhouseDragonFly.API.Controllers.Stock
 {
@@ -14,9 +17,21 @@ namespace PayhouseDragonFly.API.Controllers.Stock
     public class StockController : ControllerBase
     {
         private readonly IStockServices _stockServices;
-        public StockController(IStockServices stockServices)
+
+        private readonly ILoggeinUserServices _loggeinuser;
+
+        private readonly IRoleChecker _rolechecker;
+        private readonly IRoleServices _roleservices;
+
+        public StockController(IStockServices stockServices, ILoggeinUserServices loggeinuser,
+            IRoleChecker rolechecker,
+            IRoleServices roleservices)
         {
             _stockServices = stockServices;
+
+            _rolechecker = rolechecker;
+            _roleservices = roleservices;
+            _loggeinuser = loggeinuser;
         }
 
         [HttpPost]
@@ -461,9 +476,205 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         {
             return await _stockServices.UploadingData(file);
         }
+        [HttpPost]
+        [Route("EditSerialNumber")]
+        public async Task<StockResponse> EditSerialNumber(EditSerialNumbervm editSerialNumbervm)
+        {
+            return await _stockServices.EditSerialNumber(editSerialNumbervm);
+        }
+        [HttpPost]
+        [Route("GetSerialNumber")]
+        public async Task<StockResponse> GetSerialNumberbyid(int itemID)
+        {
+            return await _stockServices.GetSerialNumberbyid(itemID);
+        }
+        [HttpPost]
+        [Route("ScannedData")]
+        public async Task<StockResponse> PostScannedData([FromBody] ScannedDataModel data)
+        {
+            return await _stockServices.PostScannedData(data);
+        }
+        [HttpPost]
+        [Route("UploadPDFFile")]
+        public async Task<StockResponse> Upload([FromBody] PODetailsvm pODetailsvm)
+        {
+            return await _stockServices.Upload(pODetailsvm);
+        }
+        [HttpPost]
+        [Route("UploadPODetails")]
+        public async Task<StockResponse> UploadingPODetails(PODetailsvm pODetailsvm)
+        {
+            return await _stockServices.UploadingPODetails(pODetailsvm);
 
+        }
+        [HttpGet]
+        [Route("GetAllPOS")]
+        public async Task<StockResponse> GetAllPOs()
+        {
+            return await _stockServices.GetAllPOs();
+        }
+        [HttpPost]
+        [Route("UploadPOItems")]
+        public async Task<StockResponse> UploadingPOItems([FromBody] DataWrapper dataWrapper)
+        {
+            return await _stockServices.UploadingPOItems(dataWrapper);
 
+        }
+        [HttpPost]
+        [Route("Uploading>>>")]
+        public async Task UploadingItemsPO(IFormFile file, string PONumber)
+        {
+             await _stockServices.UploadingItemsPO(file,PONumber);
 
+        }
+        [HttpPost]
+        [Route("GetItemsByPO")]
+        public async Task<StockResponse> GetItemsByPO(string PONumber)
+        {
+           return await _stockServices.GetItemsByPO(PONumber);
 
+        }
+        [HttpPost]
+        [Route("UploadingPO>>>>>")]
+        public async Task<StockResponse> UploadingPO(IFormFile file)
+        {
+            return await _stockServices.UploadingPO(file);
+
+        }
+        [HttpGet]
+        [Route("GetAllPOSDetails")]
+        public async Task<StockResponse> GetAllPOSDetails()
+        {
+            return await _stockServices.GetAllPOSDetails();
+        }
+        [HttpPost]
+        [Route("GettingItemInPO")]
+        public async Task<StockResponse> GetItemsByPOS(string PONumber)
+        {
+            return await _stockServices.GetItemsByPOS(PONumber);
+
+        }
+        [HttpPost]
+        [Route("AddingPurchaseOrdersDetails")]
+       public  async Task<StockResponse> AddPurchaseOrdersDetails(PurchaseOrderssvm purchaseOrderssvm)
+        {
+            return await _stockServices.AddPurchaseOrdersDetails(purchaseOrderssvm);
+
+        }
+        [HttpGet]
+        [Route("GetAllPurchaseOrderss")]
+        public async Task<StockResponse> GetAllPurchaseOrderDetails()
+        {
+            return await _stockServices.GetAllPurchaseOrderDetails();
+        }
+        [HttpPost]
+        [Route("AdjustStock")]
+        public async Task<StockResponse> AdjustStock(AdjustStockvm adjustStockvm)
+        {
+            return await _stockServices.AdjustStock(adjustStockvm);
+
+        }
+        [HttpPost]
+        [Route("GetPOItemsbyID")]
+        public async Task<StockResponse> GetPOItemsByID(int ItemId)
+        {
+            return await _stockServices.GetPOItemsByID(ItemId);
+
+        }
+        [HttpPost]
+        [Route("GetAdjustedStockByID")]
+        public async Task<StockResponse> GetAdjustedStockById(int ItemID)
+        {
+            return await _stockServices.GetAdjustedStockById(ItemID);
+
+        }
+        [HttpGet]
+        [Route("GetAllItemsStock")]
+        public async Task<StockResponse> GetAllItemStock()
+        {
+            return await _stockServices.GetAllItemStock();
+        }
+        [HttpPost]
+        [Route("ApplyRequisition")]
+        public async Task<StockResponse> ApplyRequisition(AddRequisition addRequisition)
+        {
+            return await _stockServices.ApplyRequisition(addRequisition);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("ApplyingRequisitionForm")]
+        public async Task<StockResponse> ApplyRequisitionForm(ApplyRequistionvm addRequisition)
+        {
+            return await _stockServices.ApplyRequisitionForm(addRequisition);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("ApplicationStatus")]
+        public async Task<StockResponse> ApplicationStatus(ApprovalProcessvm approvalProcessvm)
+        {
+            return await _stockServices.ApplicationStatus(approvalProcessvm);
+        }
+        [HttpGet]
+        [Route("GetAllRequisition")]
+        public async Task<StockResponse> GetAllRequisitionApplication()
+        {
+            return await _stockServices.GetAllRequisitionApplication();
+        }
+        [HttpPost]
+        [Route("GetFormByID")]
+        public async Task<StockResponse> GetRequisitionbyId(int Id)
+        {
+            return await _stockServices.GetRequisitionbyId(Id);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("IssueProcess")]
+        public async Task<StockResponse> IssueProcess(int id)
+        {
+            var roleclaimname = "CanIssueStock";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+
+            if (loggedinuser.RoleId > 0)
+            {
+
+                if (roleclaimtrue)
+                {
+                    return await _stockServices.IssueProcess(id);
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new StockResponse(false, "You have no permission access this", null);
+
+                }
+            }
+            else
+            {
+
+                return new StockResponse(false, "You have no permission access this", null);
+            }
+            return new StockResponse(false, "", null);
+        }
+        
+        [HttpPost]
+        [Route("GetFormbyUserEmail")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<StockResponse> GetRequisitionByEmail()
+        {
+            return await _stockServices.GetRequisitionByEmail();
+        }
+        [HttpGet]
+        [Route("GetFormWithStatusPending")]
+        public async Task<StockResponse> GetFormByStatusPending()
+        {
+            return await _stockServices.GetFormByStatusPending();
+        }
+        [HttpGet]
+        [Route("GetFormStatusWithApproved")]
+        public async Task<StockResponse> GetFormStatusApproved()
+        {
+            return await _stockServices.GetFormStatusApproved();
+        }
     }
 }

@@ -1,8 +1,12 @@
-﻿using ClosedXML.Excel;
+﻿using Azure.Core;
+using ClosedXML.Excel;
+using MathNet.Numerics.Distributions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using NPOI.SS.Formula.Functions;
 using OfficeOpenXml;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.StockResponse;
 using PayhouseDragonFly.CORE.DTOs.Stock;
@@ -12,7 +16,29 @@ using PayhouseDragonFly.CORE.Models.Stock.Invoicing;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStockServices;
+using System.Drawing;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using Microsoft.AspNetCore.Hosting;
 using System.Text;
+using ZXing;
+using ZXing.Common;
+using ZXing.QrCode;
+using PdfSharp.Pdf.IO;
+using static PdfSharp.Pdf.AcroForms.PdfAcroField;
+using PdfSharp.Pdf.AcroForms;
+using NPOI;
+using PdfReader = iTextSharp.text.pdf.PdfReader;
+using iTextSharp.text.pdf.parser;
+using Org.BouncyCastle.Asn1.Ocsp;
+using Microsoft.Extensions.Logging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using NPOI.HPSF;
+using Path = System.IO.Path;
+using NPOI.OpenXmlFormats.Dml;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
+using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IEmailServices;
+using PayhouseDragonFly.CORE.DTOs.EmaillDtos;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 {
@@ -21,13 +47,18 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
         private readonly DragonFlyContext _dragonFlyContext;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IEExtraServices _extraServices;
-        public StockServices(DragonFlyContext dragonFlyContext, IServiceScopeFactory serviceScopeFactory, IEExtraServices extraServices)
+        private readonly ILogger<IStockServices> _logger;
+        private readonly IEmailServices _iemail_service;
+        public StockServices(DragonFlyContext dragonFlyContext, IServiceScopeFactory serviceScopeFactory, IEmailServices iemail_service,
+            IEExtraServices extraServices,
+            ILogger<IStockServices> logger
+            )
         {
             _dragonFlyContext = dragonFlyContext;
             _serviceScopeFactory = serviceScopeFactory;
             _extraServices = extraServices;
-
-
+            _logger = logger;
+            _iemail_service = iemail_service;
 
         }
 
@@ -107,22 +138,22 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 if (addItemvm.Category == "")
                 {
                     return new StockResponse(false, "Kindly provide category", null);
-               
+
                 }
-                if(addItemvm.BrandName=="")
+                if (addItemvm.BrandName == "")
                 {
                     return new StockResponse(false, "Kindly provide brand name", null);
 
                 }
-                if (addItemvm.Currency=="")
+                if (addItemvm.Currency == "")
                 {
                     return new StockResponse(false, "Kindly provide currency", null);
                 }
                 if (addItemvm.IndicativePrice < 0)
                 {
-                    return new StockResponse(false, "Kindly provide indicative price",null);
+                    return new StockResponse(false, "Kindly provide indicative price", null);
                 }
-                if(addItemvm.ReOrderLevel < 0)
+                if (addItemvm.ReOrderLevel < 0)
                 {
                     return new StockResponse(false, "Kindly provide reorder level", null);
                 }
@@ -136,25 +167,25 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
 
 
-                    var itemexists = await scopedcontext.AddItem.Where(x => x.ItemName == addItemvm.ItemName && x.BrandName==addItemvm.BrandName).FirstOrDefaultAsync();
+                    var itemexists = await scopedcontext.AddItem.Where(x => x.ItemName == addItemvm.ItemName && x.BrandName == addItemvm.BrandName).FirstOrDefaultAsync();
 
                     if (itemexists != null)
                     {
                         return new StockResponse(false, $" Item  '{addItemvm.BrandName}-{addItemvm.ItemName}' already exist", null);
                     }
-                   
+
                     var itemclass = new AddItem
                     {
                         ItemName = addItemvm.ItemName,
-                        Category=addItemvm.Category,
-                        Currency=addItemvm.Currency,
-                        IndicativePrice=addItemvm.IndicativePrice,
-                        ReOrderLevel=addItemvm.ReOrderLevel,
-                        BrandName=addItemvm.BrandName,
-                        ItemDescription=addItemvm.ItemDescription,
-                        
+                        Category = addItemvm.Category,
+                        Currency = addItemvm.Currency,
+                        IndicativePrice = addItemvm.IndicativePrice,
+                        ReOrderLevel = addItemvm.ReOrderLevel,
+                        BrandName = addItemvm.BrandName,
+                        ItemDescription = addItemvm.ItemDescription,
+
                     };
-                   
+
                     await scopedcontext.AddAsync(itemclass);
                     await scopedcontext.SaveChangesAsync();
                     return new StockResponse(true, $"Item '{addItemvm.ItemName}'  created successfully", null);
@@ -238,7 +269,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                         StockInTransit = addStockvm.StockInTransit,
                         Quantity = addStockvm.Quantity,
                         SalesCurrency = addStockvm.SalesCurrency,
-                        ReorderRequired=addStockvm.ReorderRequired,
+                        ReorderRequired = addStockvm.ReorderRequired,
 
 
                     };
@@ -251,7 +282,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     {
                         itemclass.Status = "Good";
                     }
-                    else if (itemclass.AvailableStock < addStockvm.ReOrderLevel && itemclass.AvailableStock > 0 ||itemclass.AvailableStock==addStockvm.ReOrderLevel)
+                    else if (itemclass.AvailableStock < addStockvm.ReOrderLevel && itemclass.AvailableStock > 0 || itemclass.AvailableStock == addStockvm.ReOrderLevel)
                     {
                         itemclass.Status = "Low";
                     }
@@ -267,7 +298,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     {
                         itemclass.ReorderRequired = "No";
                     }
-                    
+
 
                     var checkitemexits = await scopedcontext.AddStock
                         .Where(y => y.ItemName == addStockvm.ItemName && y.BrandName == addStockvm.BrandName)
@@ -316,7 +347,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     {
                         lastupdate.Status = "Good";
                     }
-                    else if (lastupdate.AvailableStock < lastupdate.ReOrderLevel && lastupdate.AvailableStock>0)
+                    else if (lastupdate.AvailableStock < lastupdate.ReOrderLevel && lastupdate.AvailableStock > 0)
                     {
                         lastupdate.Status = "Low";
                     }
@@ -438,7 +469,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 }
 
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 return new StockResponse(false, ex.Message, null);
             }
         }
@@ -447,11 +479,11 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
             try
             {
-               
+
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
-                    var allstock = await scopedcontext.AddStock.OrderByDescending(x=>x.DateAdded).ToListAsync();
+                    var allstock = await scopedcontext.AddStock.OrderByDescending(x => x.DateAdded).ToListAsync();
 
                     if (allstock == null)
                     {
@@ -477,10 +509,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                             SalesCurrency = stock.SalesCurrency,
                             StockInTransit = stock.StockInTransit,
                             OpeningStock = stock.OpeningStock,
-                            ReorderRequired=stock.ReorderRequired,
-                            StockOut=stock.StockOut,
+                            ReorderRequired = stock.ReorderRequired,
+                            StockOut = stock.StockOut,
                             TotalReturnedStock = stock.TotalReturnedStock,
-                            StockIn=stock.StockIn,
+                            StockIn = stock.StockIn,
                         };
                         allstock.Sum(x => x.Quantity);
                         newstockfound.TotalBuyingPrice = stock.BuyingPrice * stock.AvailableStock;
@@ -642,16 +674,16 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
 
                     };
-                 
+
                     itemexists.Quantity -= addSalesOrdersVm.Quantity;
                     itemexists.StockOut += addSalesOrdersVm.Quantity;
-                    if (  itemexists.AvailableStock == 0)
+                    if (itemexists.AvailableStock == 0)
                     {
                         return new StockResponse(false, "No available stock please restock first....", null);
                     }
-                    if(itemexists.AvailableStock < itemclass.Quantity)
+                    if (itemexists.AvailableStock < itemclass.Quantity)
                     {
-                        return new StockResponse(false, $"Note:You can only stockOut from '{itemexists.AvailableStock}'!!! ",null);
+                        return new StockResponse(false, $"Note:You can only stockOut from '{itemexists.AvailableStock}'!!! ", null);
                     }
                     itemexists.AvailableStock -= addSalesOrdersVm.Quantity;
 
@@ -659,7 +691,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     {
                         itemexists.Status = "Good";
                     }
-                    else if (itemexists.AvailableStock < itemexists.ReOrderLevel && itemexists.AvailableStock > 0 ||itemexists.AvailableStock==itemexists.ReOrderLevel)
+                    else if (itemexists.AvailableStock < itemexists.ReOrderLevel && itemexists.AvailableStock > 0 || itemexists.AvailableStock == itemexists.ReOrderLevel)
                     {
                         itemexists.Status = "Low";
                     }
@@ -667,7 +699,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     {
                         itemexists.Status = "Out";
                     }
-                    if(itemexists.AvailableStock < itemexists.ReOrderLevel || itemexists.AvailableStock == itemexists.ReOrderLevel)
+                    if (itemexists.AvailableStock < itemexists.ReOrderLevel || itemexists.AvailableStock == itemexists.ReOrderLevel)
                     {
                         itemexists.ReorderRequired = "Yes";
                     }
@@ -675,15 +707,15 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     {
                         itemexists.ReorderRequired = "No";
                     }
-                  
-                    
+
+
 
                     await scopedcontext.AddAsync(itemclass);
                     await scopedcontext.SaveChangesAsync();
                     return new StockResponse(true, "StockOut has been added successfully", null);
 
                 }
-                
+
 
             }
             catch (Exception ex)
@@ -966,7 +998,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
             {
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
-                 
+
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
                     var purchaseexists = await scopedcontext.Sales.Where(u => u.SalesId == salesId).FirstOrDefaultAsync();
                     if (purchaseexists == null)
@@ -975,9 +1007,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     }
                     return new StockResponse(true, "Queried successfully", purchaseexists);
 
-                    
+
                 }
-       
+
 
             }
             catch (Exception ex)
@@ -987,17 +1019,17 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
         }
         public async Task<StockResponse> GenerateExcel()
         {
-           
-               
-                    using var wbook = new XLWorkbook();
-                    var ws = wbook.AddWorksheet("Stock");
-              ws.FirstCell().Value = "Product ID";
+
+
+            using var wbook = new XLWorkbook();
+            var ws = wbook.AddWorksheet("Stock");
+            ws.FirstCell().Value = "Product ID";
             ws.Cell("B1").Value = "Product Name";
-                ws.Cell("C1").Value = "Stock In";
+            ws.Cell("C1").Value = "Stock In";
             ws.Cell("D1").Value = "Stock Out";
             ws.Cell("E1").Value = "Buying Price";
 
-             ws.Column(2).AdjustToContents();
+            ws.Column(2).AdjustToContents();
             ws.Column(1).AdjustToContents();
             ws.Column(3).AdjustToContents();
             ws.Column(4).AdjustToContents();
@@ -1005,14 +1037,14 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
             wbook.SaveAs("Product.xlsx");
 
-            return new StockResponse(true,"Success",null);
-           
+            return new StockResponse(true, "Success", null);
+
 
 
 
 
         }
-       
+
 
 
 
@@ -1297,7 +1329,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
         }
         public async Task<StockResponse> SearchForStock(string search_query)
-      {
+        {
 
             try
             {
@@ -1310,15 +1342,15 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                         (u => EF.Functions.Like(u.BrandName, $"%{search_query}%") ||
                         EF.Functions.Like(u.ItemName, $"%{search_query}%") ||
                         EF.Functions.Like(u.Status, $"%{search_query}%") ||
-                        EF.Functions.Like(u.ReorderRequired,$"%{search_query}%")
+                        EF.Functions.Like(u.ReorderRequired, $"%{search_query}%")
                         ).ToListAsync();
 
                     if (allstock == null)
                         return new StockResponse(false, "", null);
 
-               return new StockResponse(true, "Successfully queried", allstock);
+                    return new StockResponse(true, "Successfully queried", allstock);
 
-                    
+
                 }
             }
             catch (Exception ex)
@@ -1329,7 +1361,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
         }
 
         public async Task<StockResponse> SearchForStockIn(string search_query)
-       {
+        {
 
             try
             {
@@ -1342,7 +1374,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                          (u => EF.Functions.Like(u.BrandName, $"%{search_query}%") ||
                         EF.Functions.Like(u.ItemName, $"%{search_query}%") ||
                         EF.Functions.Like(u.SupplierName, $"%{search_query}%") ||
-                        EF.Functions.Like(u.Currency, $"%{search_query}%") 
+                        EF.Functions.Like(u.Currency, $"%{search_query}%")
 
                         ).ToListAsync();
 
@@ -1374,7 +1406,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                          (u => EF.Functions.Like(u.BrandName, $"%{search_query}%") ||
                         EF.Functions.Like(u.ItemName, $"%{search_query}%") ||
                         EF.Functions.Like(u.CustomerName, $"%{search_query}%") ||
-                        EF.Functions.Like(u.Comments, $"%{search_query}%")||
+                        EF.Functions.Like(u.Comments, $"%{search_query}%") ||
                          EF.Functions.Like(u.Department, $"%{search_query}%")
 
                         ).ToListAsync();
@@ -1410,7 +1442,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                          (u => EF.Functions.Like(u.CustomerName, $"%{search_query}%") ||
                         EF.Functions.Like(u.CompanyName, $"%{search_query}%") ||
                         EF.Functions.Like(u.Email, $"%{search_query}%") ||
-                        EF.Functions.Like(u.PhoneNumber, $"%{search_query}%") 
+                        EF.Functions.Like(u.PhoneNumber, $"%{search_query}%")
 
                         ).ToListAsync();
 
@@ -1429,7 +1461,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
             }
         }
         public async Task<StockResponse> SearchForSupplier(string search_query)
-      {
+        {
 
             try
             {
@@ -1525,7 +1557,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     {
                         salesexists.Department = salesvm.Department;
                     }
-                 
+
 
 
 
@@ -1627,7 +1659,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     {
                         salesexists.PhoneNumber = editCustomervm.PhoneNumber;
                     }
-                  
+
 
 
 
@@ -1836,7 +1868,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     }
 
 
-                  
+
 
                     scopedcontext.Update(salesexists);
                     await scopedcontext.SaveChangesAsync();
@@ -1916,7 +1948,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     {
                         salesexists.ItemDescription = editItemvm.ItemDescription;
                     }
-                    if (editItemvm.IndicativePrice <0)
+                    if (editItemvm.IndicativePrice < 0)
                     {
                         salesexists.IndicativePrice = salesexists.IndicativePrice;
 
@@ -2001,8 +2033,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     {
                         purchaseexists.SupplierName = editPurchasevm.SupplierName;
                     }
-                  
-                 
+
+
 
 
 
@@ -2047,7 +2079,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     var categoryclass = new AddCategory
                     {
                         CategoryName = addCategoryvm.CategoryName,
-                        CategoryDesc=addCategoryvm.CategoryDesc,
+                        CategoryDesc = addCategoryvm.CategoryDesc,
                     };
                     await scopedcontext.AddAsync(categoryclass);
                     await scopedcontext.SaveChangesAsync();
@@ -2097,22 +2129,22 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
                     return new StockResponse(false, "Kindly provide an suplier name ", null);
                 }
-                
-               
+
+
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
 
 
 
-                    var itemexists = await scopedcontext.StockIn.Where(x => x.InvoiceDate == stockInvm.InvoiceDate && x.SupplierName==stockInvm.SupplierName).FirstOrDefaultAsync();
+                    var itemexists = await scopedcontext.StockIn.Where(x => x.InvoiceDate == stockInvm.InvoiceDate && x.SupplierName == stockInvm.SupplierName).FirstOrDefaultAsync();
 
                     if (itemexists != null)
                     {
                         return new StockResponse(false, $" Invoice  already exist... ", null);
                     }
 
-                    var lpo_no_obj =  GetLpo_Number().Result;
+                    var lpo_no_obj = GetLpo_Number().Result;
                     var lponumber = "LPO-" + lpo_no_obj;
                     var invoice_no_obj = GetInvoiceNumber().Result;
                     var invoicenumber = "INV-" + invoice_no_obj;
@@ -2122,8 +2154,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                         InvoiceDate = stockInvm.InvoiceDate,
                         LPODate = stockInvm.LPODate,
                         LPONumber = lponumber,
-                        InvoiceNumber=invoicenumber,
-                        Status="Incomplete",
+                        InvoiceNumber = invoicenumber,
+                        Status = "Incomplete",
 
 
 
@@ -2163,14 +2195,14 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
             {
                 var newvalue = new lpoNo();
 
-                newvalue.LpoNo=1;
+                newvalue.LpoNo = 1;
                 await _dragonFlyContext.AddAsync(newvalue);
                 await _dragonFlyContext.SaveChangesAsync();
-                return newvalue.LpoNo ;
+                return newvalue.LpoNo;
             }
 
             last_number_obj.LpoNo = last_number_obj.LpoNo + 1;
-              _dragonFlyContext.Update(last_number_obj);
+            _dragonFlyContext.Update(last_number_obj);
             await _dragonFlyContext.SaveChangesAsync();
 
             return last_number_obj.LpoNo;
@@ -2206,7 +2238,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
-                    var allinvoice = await scopedcontext.StockIn.OrderByDescending(y=>y.StockInDate).ToListAsync();
+                    var allinvoice = await scopedcontext.StockIn.OrderByDescending(y => y.StockInDate).ToListAsync();
 
                     if (allinvoice == null)
                     {
@@ -2236,7 +2268,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     return new StockResponse(false, "Kindly provide category", null);
 
                 }
-               
+
                 if (addBatchDetailsvm.Currency == "")
                 {
                     return new StockResponse(false, "Kindly provide currency", null);
@@ -2245,11 +2277,11 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 {
                     return new StockResponse(false, "Kindly provide unit price", null);
                 }
-                if (addBatchDetailsvm.Quantity <0)
+                if (addBatchDetailsvm.Quantity < 0)
                 {
                     return new StockResponse(false, "Kindly provide quantity", null);
                 }
-                if (addBatchDetailsvm.Warranty <0)
+                if (addBatchDetailsvm.Warranty < 0)
                 {
                     return new StockResponse(false, "Kindly provide warranty", null);
                 }
@@ -2257,7 +2289,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 {
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
                     var invoiceexists = await scopedcontext.StockIn
-                 .Where(y => y.InvoiceNumber == addBatchDetailsvm.InvoiceNumber ).OrderByDescending(y=>y.InvoiceNumber).FirstOrDefaultAsync();
+                 .Where(y => y.InvoiceNumber == addBatchDetailsvm.InvoiceNumber).OrderByDescending(y => y.InvoiceNumber).FirstOrDefaultAsync();
                     if (invoiceexists == null)
                     {
                         return new StockResponse(false, "Invoice Number does not exist", null);
@@ -2265,7 +2297,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
                     var loggedinuserobject = await _extraServices.LoggedInUser();
 
-                    var userEmail = loggedinuserobject.FirstName + ' '   +loggedinuserobject.LastName;
+                    var userEmail = loggedinuserobject.FirstName + ' ' + loggedinuserobject.LastName;
 
                     if (loggedinuserobject == null)
                     {
@@ -2276,14 +2308,14 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
 
 
-                  
+
                     var itemNameexists = await scopedcontext.AddItem
-                   .Where(y => y.ItemName == addBatchDetailsvm.ItemName ).FirstOrDefaultAsync();
+                   .Where(y => y.ItemName == addBatchDetailsvm.ItemName).FirstOrDefaultAsync();
                     if (itemNameexists == null)
                     {
                         return new StockResponse(false, "Item name does not exist", null);
                     }
-                   
+
                     var itemclass = new InvoiceLinesDetails
                     {
                         ItemName = addBatchDetailsvm.ItemName,
@@ -2291,26 +2323,26 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                         Currency = addBatchDetailsvm.Currency,
                         UnitPrice = addBatchDetailsvm.UnitPrice,
                         Warranty = addBatchDetailsvm.Warranty,
-                        Quantity=addBatchDetailsvm.Quantity,
-                        WarrantyStartDate=addBatchDetailsvm.WarrantyStartDate,
-                        UpdatedBy= userEmail,
-                        UpdatedOn=addBatchDetailsvm.UpdatedOn,
-                        InvoiceNumber=addBatchDetailsvm.InvoiceNumber ,
-                        BrandName=addBatchDetailsvm.BrandName,
-                       
+                        Quantity = addBatchDetailsvm.Quantity,
+                        WarrantyStartDate = addBatchDetailsvm.WarrantyStartDate,
+                        UpdatedBy = userEmail,
+                        UpdatedOn = addBatchDetailsvm.UpdatedOn,
+                        InvoiceNumber = addBatchDetailsvm.InvoiceNumber,
+                        BrandName = addBatchDetailsvm.BrandName,
+
 
 
 
 
 
                     };
-                    var itemassigned = await scopedcontext.AddProductDetails.Where(x => x.ItemID == itemclass.InvoiceLineId).FirstOrDefaultAsync();
-                    
-                    if (itemassigned != null)
-                    {
-                        itemassigned.ProductStatus = itemclass.Status;
-                        return new StockResponse(false, "ITEM ALREADY COMPLETE", null);
-                    }
+                    //var itemassigned = await scopedcontext.AddProductDetails.Where(x => x.ItemID == itemclass.InvoiceLineId).FirstOrDefaultAsync();
+
+                    //if (itemassigned != null)
+                    //{
+                    //    itemassigned.ProductStatus = itemclass.Status;
+                    //    return new StockResponse(false, "ITEM ALREADY COMPLETE", null);
+                    //}
                     var itemexists = await scopedcontext.InvoiceLinesDetails.Where(x => x.ItemName == addBatchDetailsvm.ItemName && x.BrandName == addBatchDetailsvm.BrandName && x.InvoiceNumber == addBatchDetailsvm.InvoiceNumber && x.CategoryName == itemNameexists.Category).FirstOrDefaultAsync();
 
 
@@ -2324,7 +2356,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
                     itemclass.Reference_Number = await GetGeneratedref();
                     itemclass.TotalUnitPrice = itemclass.UnitPrice * itemclass.Quantity;
-                   
+
                     if (itemclass.CategoryName == "Accesory")
                     {
                         itemclass.Status = "Complete";
@@ -2333,17 +2365,18 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     {
                         itemclass.Status = "Incomplete";
                     }
-                
-                   
+
+
 
 
                     itemclass.WarrantyEndDate = itemclass.WarrantyStartDate.AddMonths(itemclass.Warranty);
                     await scopedcontext.AddAsync(itemclass);
                     await scopedcontext.SaveChangesAsync();
-                    if (itemclass.CategoryName == "Product") { 
-                    var new_numb = 0;
+                    if (itemclass.CategoryName == "Product")
+                    {
+                        var new_numb = 0;
 
-                      
+
 
                         while (new_numb < itemclass.Quantity)
                         {
@@ -2354,14 +2387,14 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                                 NumberValue = new_numb,
                                 Reference_Number = itemclass.Reference_Number,
                                 Type = "Product",
-                                Status="UNASSIGNED"
+                                Status = "UNASSIGNED"
 
 
                             };
-                          
 
 
-                         
+
+
 
 
 
@@ -2369,7 +2402,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                             await _dragonFlyContext.SaveChangesAsync();
                         }
                     }
-                    
+
                     return new StockResponse(true, $"Item '{addBatchDetailsvm.BrandName}-{addBatchDetailsvm.ItemName}' in invoice{addBatchDetailsvm.InvoiceNumber}  created successfully", null);
 
                 }
@@ -2390,7 +2423,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
-                    var allinvoice = await scopedcontext.InvoiceLinesDetails.OrderByDescending(y=>y.UpdatedOn).ToListAsync();
+                    var allinvoice = await scopedcontext.InvoiceLinesDetails.OrderByDescending(y => y.UpdatedOn).ToListAsync();
 
                     if (allinvoice == null)
                     {
@@ -2429,7 +2462,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
-                 
+
                     //var itemexists = await scopedcontext.InvoiceLinesDetails
                     //    .Where(y => y.InvoiceLineId == addProductDetailvm.invoiceItemId ).FirstOrDefaultAsync();
 
@@ -2455,12 +2488,12 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
 
                     };
-                  
+
 
                     var itemexists = await scopedcontext.AddProductDetails
                     .Where(y => y.SerialNumber == itemclass.SerialNumber).FirstOrDefaultAsync();
 
-                    
+
                     if (itemexists != null)
                     {
                         return new StockResponse(false, $"Serial Number '{addProductDetailvm.SerialNumber}' already exists", null);
@@ -2523,17 +2556,17 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     }
 
                     var all_numbers = await _dragonFlyContext.ProductNumbering
-                        .Where(y => y.Reference_Number == addProductDetailvm.reference_number).Select(s =>  s.NumberValue).ToListAsync();
-                    var max_number = all_numbers.Max();    
+                        .Where(y => y.Reference_Number == addProductDetailvm.reference_number).Select(s => s.NumberValue).ToListAsync();
+                    var max_number = all_numbers.Max();
 
-                    if(addProductDetailvm.Product_No> max_number)
+                    if (addProductDetailvm.Product_No > max_number)
                     {
-                       itemclass.ProductStatus = "Complete";
+                        itemclass.ProductStatus = "Complete";
                         return new StockResponse(false, "All item are added", null);
-                        
-                        
+
+
                     }
-                    
+
 
 
                     //var allnumbervalue = await scopedcontext.ProductNumbering.Where(x => x.NumberValue == addProductDetailvm.Product_No).ToListAsync();
@@ -2560,8 +2593,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     await _dragonFlyContext.SaveChangesAsync();
 
 
-                    
-                    if (addProductDetailvm.Product_No== max_number)
+
+                    if (addProductDetailvm.Product_No == max_number)
                     {
                         var Invoceive_item_exists = await scopedcontext.InvoiceLinesDetails.
                             Where(y => y.InvoiceLineId == itemclass.ItemID).FirstOrDefaultAsync();
@@ -2570,12 +2603,12 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                             return new StockResponse(false, "No invice item found", null);
                         Invoceive_item_exists.Status = "Complete";
 
-                        
+
                         scopedcontext.Update(Invoceive_item_exists);
                         await scopedcontext.SaveChangesAsync();
                         return new StockResponse(true, " ALL ITEMS ADDED SUCCESSFULLY", null);
                     }
-               
+
                     return new StockResponse(true, $"Item '{addProductDetailvm.SerialNumber}'  created successfully", null);
 
 
@@ -2649,7 +2682,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 {
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
 
-                  
+
 
                     var partexists = await scopedcontext.AddPart.Where(x => x.PartName == addPartvm.PartName).FirstOrDefaultAsync();
 
@@ -2724,9 +2757,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 {
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
                     int length = 8;
-                    var paymentref = "PH_invoice_" +  GenerateReferenceNumber(length);
+                    var paymentref = "PH_invoice_" + GenerateReferenceNumber(length);
                     //check reference exists
-                    
+
                     return paymentref;
                 }
             }
@@ -2752,12 +2785,12 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                         Quantity = vm.Quantity,
                         Type = vm.Type
                     };
-                    var string_resp=  GetGeneratedref().Result;
+                    var string_resp = GetGeneratedref().Result;
 
                     new_invoicee_item.Invoice_quantity_Unique_id = string_resp;
 
 
-                    
+
 
 
                     await scopedcontext.AddAsync(new_invoicee_item);
@@ -2858,7 +2891,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
             {
                 return new StockResponse(false, ex.Message, null);
             }
-            
+
         }
         public async Task<StockResponse> GetInvoiceLinByNumber(string invoiceNumber)
         {
@@ -2868,7 +2901,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 {
 
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
-                    var supplierexists = await scopedcontext.InvoiceLinesDetails.Where(u => u.InvoiceNumber == invoiceNumber).OrderByDescending(u=>u.UpdatedOn).ToListAsync();
+                    var supplierexists = await scopedcontext.InvoiceLinesDetails.Where(u => u.InvoiceNumber == invoiceNumber).OrderByDescending(u => u.UpdatedOn).ToListAsync();
                     if (supplierexists == null)
                     {
                         return new StockResponse(false, "not found", null);
@@ -2924,9 +2957,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
             }
         }
 
-        public async Task<StockResponse> GetProduct_Numbers_ByReference( string reference)
+        public async Task<StockResponse> GetProduct_Numbers_ByReference(string reference)
         {
-            
+
 
 
             try
@@ -2936,9 +2969,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                     .Where(y => y.Status == "UNASSIGNED" && y.Reference_Number == reference).ToListAsync();
                 return new StockResponse(true, "successfully queried", allnumberings);
             }
-            catch(Exception ex){
+            catch (Exception ex)
+            {
 
-             return new StockResponse(false,ex.Message, null);
+                return new StockResponse(false, ex.Message, null);
             }
         }
 
@@ -3038,10 +3072,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
                     var allstock = await scopedcontext.AddItem.Where
                         (u => EF.Functions.Like(u.BrandName, $"%{search_query}%") ||
-                        EF.Functions.Like(u.ItemName, $"%{search_query}%")||
+                        EF.Functions.Like(u.ItemName, $"%{search_query}%") ||
                         EF.Functions.Like(u.ItemDescription, $"%{search_query}%") ||
                         EF.Functions.Like(u.Category, $"%{search_query}%") ||
-                        EF.Functions.Like(u.Currency, $"%{search_query}%") 
+                        EF.Functions.Like(u.Currency, $"%{search_query}%")
                         ).ToListAsync();
 
                     if (allstock == null)
@@ -3091,12 +3125,12 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
                     var allstock = await scopedcontext.InvoiceLinesDetails.Where
                         (u => EF.Functions.Like(u.ItemName, $"%{search_query}%") ||
-                        EF.Functions.Like(u.CategoryName, $"%{search_query}%")||
+                        EF.Functions.Like(u.CategoryName, $"%{search_query}%") ||
                           EF.Functions.Like(u.Currency, $"%{search_query}%") ||
                             EF.Functions.Like(u.UpdatedBy, $"%{search_query}%") ||
                                EF.Functions.Like(u.BrandName, $"%{search_query}%") ||
 
-                              EF.Functions.Like(u.Status, $"%{search_query}%") 
+                              EF.Functions.Like(u.Status, $"%{search_query}%")
 
                         ).ToListAsync();
 
@@ -3122,7 +3156,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 {
 
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
-                 
+
                     foreach (var item in data)
                     {
                         var new_product_item = new AddProductDetails
@@ -3135,7 +3169,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                         await scopedcontext.SaveChangesAsync();
 
                     }
-                   
+
 
                     return new StockResponse(true, "Added successful", null);
                 }
@@ -3147,7 +3181,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
 
 
         }
-        public async Task <StockResponse> UploadingData(IFormFile file)
+        public async Task<StockResponse> UploadingData(IFormFile file)
         {
             try
             {
@@ -3155,6 +3189,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 {
 
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
 
                     using (var stream = new MemoryStream())
                     {
@@ -3173,26 +3208,30 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                                 for (int row = 2; row <= rowCount; row++) // Assuming the first row contains headers
                                 {
 
+
                                     var product = new AddProductDetails
 
                                     {
                                         SerialNumber = worksheet.Cells[row, 1].Value?.ToString(),
                                         IMEI1 = int.Parse(worksheet.Cells[row, 2].Value?.ToString()),
                                         IMEI2 = int.Parse(worksheet.Cells[row, 3].Value?.ToString()),
-                                       
+
+
+
                                     };
 
+                                    product.ItemID = product.BatchID;
                                     products.Add(product);
-                                   
+
                                 }
-                                foreach(var each_product in products)
+                                foreach (var each_product in products)
                                 {
                                     // Save the list of students to the database
                                     await scopedcontext.AddAsync(each_product);
                                     await scopedcontext.SaveChangesAsync();
                                 }
 
-                                
+
 
                                 return new StockResponse(true, "Uploaded successfully", products);
                             }
@@ -3205,8 +3244,1406 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.StockServices
                 return new StockResponse(false, ex.Message, null);
             }
 
-            return new StockResponse(false,"Invalid file or file format.",null);
+            return new StockResponse(false, "Invalid file or file format.", null);
         }
+        public async Task<StockResponse> EditSerialNumber(EditSerialNumbervm editSerialNumbervm)
+        {
+            try
+            {
+
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var salesexists = await scopedcontext.AddProductDetails.Where(u => u.BatchID == editSerialNumbervm.ItemID).FirstOrDefaultAsync();
+
+
+                    if (salesexists == null)
+                    {
+
+                        return new StockResponse(false, "product does not exist", null);
+                    }
+
+                    if (editSerialNumbervm.SerialNumber == "string")
+                    {
+                        salesexists.SerialNumber = salesexists.SerialNumber;
+
+                    }
+                    else
+                    {
+                        salesexists.SerialNumber = editSerialNumbervm.SerialNumber;
+                    }
+
+
+                    if (editSerialNumbervm.IMEI1 == 0)
+                    {
+                        salesexists.IMEI1 = salesexists.IMEI1;
+
+                    }
+                    else
+                    {
+                        salesexists.IMEI1 = editSerialNumbervm.IMEI1;
+                    }
+                    if (editSerialNumbervm.IMEI2 == 0)
+                    {
+                        salesexists.IMEI2 = salesexists.IMEI2;
+
+                    }
+                    else
+                    {
+                        salesexists.IMEI2 = editSerialNumbervm.IMEI2;
+                    }
+                    var itemexists = await scopedcontext.AddProductDetails
+                   .Where(y => y.SerialNumber == editSerialNumbervm.SerialNumber).FirstOrDefaultAsync();
+
+
+                    //    if (itemexists != null)
+                    //    {
+                    //        return new StockResponse(false, $"Serial Number '{editSerialNumbervm.SerialNumber}' already exists", null);
+
+                    //    }
+                    //    var imei1exists = await scopedcontext.AddProductDetails
+                    //   .Where(y => y.IMEI1 == editSerialNumbervm.IMEI1).FirstOrDefaultAsync();
+
+                    //    if (imei1exists != null)
+                    //    {
+                    //        return new StockResponse(false, $"IMEI1 '{editSerialNumbervm.IMEI1}' already exists", null);
+
+                    //    }
+                    //    var imei2exists = await scopedcontext.AddProductDetails
+                    //.Where(y => y.IMEI2 == editSerialNumbervm.IMEI2).FirstOrDefaultAsync();
+
+                    //    if (imei2exists != null)
+                    //    {
+                    //        return new StockResponse(false, $"IMEI2 '{editSerialNumbervm.IMEI2}' already exists", null);
+
+                    //    }
+
+                    scopedcontext.Update(salesexists);
+                    await scopedcontext.SaveChangesAsync();
+
+                    return new StockResponse(true, "Sucessfully updated product details", salesexists);
+
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> GetSerialNumberbyid(int itemID)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var product_exist = await scopedcontext.AddProductDetails.Where(u => u.BatchID == itemID).FirstOrDefaultAsync();
+                    if (product_exist == null)
+                    {
+                        return new StockResponse(false, "not found", null);
+                    }
+                    return new StockResponse(true, "Queried successfully", product_exist);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+
+
+        public async Task<StockResponse> PostScannedData([FromBody] ScannedDataModel data)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    // Process the scanned data
+                    var serialNumber = data.SerialNumber;
+                    var imei1 = data.IMEI1;
+                    var imei2 = data.IMEI2;
+                }
+
+
+                // Perform further actions with the scanned data
+
+
+                return new StockResponse(true, "Successfully scanned the details", null);
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> Upload([FromBody] PODetailsvm pODetailsvm)
+        {
+            using (var scope = _serviceScopeFactory.CreateScope())
+            {
+                var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+
+                var new_podetails = new PODetails
+                {
+                    PONumber = pODetailsvm.PONumber,
+                    PODate =Convert.ToDateTime(pODetailsvm.PODate),
+                    Vendor = pODetailsvm.Vendor,
+                };
+                    await scopedcontext.AddAsync(new_podetails);
+                await scopedcontext.SaveChangesAsync();
+                return new StockResponse(true, "Uploaded file successfully", new_podetails);
+
+            }
+        
+
+            // Save the student data to the database or perform any other actions
+            // For simplicity, let's just return the received data as a response
+
+            //return new StockResponse(true, "Uploaded data successfully", null);
+        
+            }
+        public async Task<StockResponse> UploadingPODetails(PODetailsvm pODetailsvm)
+        {
+            try
+            {
+                if (pODetailsvm.PONumber == "" )
+                {
+
+                    return new StockResponse(false, "Kindly upload a file", null);
+                }
+                if (pODetailsvm.PODate == "")
+                {
+
+                    return new StockResponse(false, "Kindly upload a file", null);
+                }
+                if (pODetailsvm.Vendor == "")
+                {
+
+                    return new StockResponse(false, "Kindly provide a vendor name to add po", null);
+                }
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    //check if role exists 
+
+                    var poexists = await scopedcontext.PODetails.Where(x => x.PONumber == pODetailsvm.PONumber).FirstOrDefaultAsync();
+
+                    if (poexists != null)
+                    {
+                        return new StockResponse(false, $" PO  '{pODetailsvm.PONumber}' already exists",null);
+                    }
+                    var poclass = new PODetails
+                    {
+                        PONumber = pODetailsvm.PONumber,
+                        PODate=Convert.ToDateTime(pODetailsvm.PODate),
+                        Vendor=pODetailsvm.Vendor,
+                    };
+                    await scopedcontext.AddAsync(poclass);
+                    await scopedcontext.SaveChangesAsync();
+                    return new StockResponse(true, $"PO-Number '{pODetailsvm.PONumber}'  created successfully", poclass);
+
+                }
+
+            }
+
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+
+            return new StockResponse(false, "Invalid file or file format.", null);
+        }
+        public async Task<StockResponse> GetAllPOs()
+        {
+
+            try
+            {
+
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var allpos = await scopedcontext.PODetails.ToListAsync();
+
+                    if (allpos == null)
+                    {
+                        return new StockResponse(false, "PO doesn't exist", null);
+                    }
+                    return new StockResponse(true, "Successfully queried", allpos);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> UploadingPOItems([FromBody] DataWrapper dataWrapper)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    //Console.WriteLine("Uploaded items", uploadPOItemvm);
+                    foreach (var item in dataWrapper.ArrayList)
+                    {
+                        Console.WriteLine(item);
+                    }
+
+               
+                    scopedcontext.SaveChanges();
+                }
+
+              
+
+                    return new StockResponse (true,"Data received and stored successfully.",null);
+                }
+            
+
+                // var purchaseOrder = JsonConvert.DeserializeObject<PurchaseOrderModel>(data);
+                //    if (uploadPOItemvm.ItemName == "")
+                //    {
+
+            //        return new StockResponse(false, "Kindly upload a file", null);
+            //    }
+            //    if (uploadPOItemvm.Amount == "")
+            //    {
+
+            //        return new StockResponse(false, "Kindly upload a file", null);
+            //    }
+            //    if (uploadPOItemvm.Rate == "")
+            //    {
+
+            //        return new StockResponse(false, "Kindly upload a file", null);
+            //    }
+            //    if (uploadPOItemvm.Quantity == 0)
+            //    {
+
+            //        return new StockResponse(false, "Kindly upload a file", null);
+            //    }
+            //    using (var scope = _serviceScopeFactory.CreateScope())
+            //    {
+            //        var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+            //        //check if role exists 
+
+            //        var itemexists = await scopedcontext.UploadPOItem.Where(x => x.ItemName == uploadPOItemvm.ItemName).FirstOrDefaultAsync();
+
+            //        if (itemexists != null)
+            //        {
+            //            return new StockResponse(false, $" Item  '{uploadPOItemvm.ItemName}' already exists! please update quantity", null);
+            //        }
+            //        var items = new List<UploadPOItem>();
+            //        var itempoclass = new UploadPOItem
+            //        {
+            //            ItemName = uploadPOItemvm.ItemName,
+            //            Amount = uploadPOItemvm.Amount,
+            //            Rate = uploadPOItemvm.Rate,
+            //            Quantity = uploadPOItemvm.Quantity,
+            //        };
+            //        items.Add(itempoclass);
+            //        foreach (var each_item in items)
+            //        {
+            //            // Save the list of students to the database
+            //            await scopedcontext.AddAsync(each_item);
+            //            await scopedcontext.SaveChangesAsync();
+            //        }
+
+            //        return new StockResponse(true, $"Item '{uploadPOItemvm.ItemName}'  created successfully", itempoclass);
+
+
+            
+
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+
+            return new StockResponse(false, "Invalid file or file format.", null);
+        }
+        public async Task UploadingItemsPO(IFormFile file,string PONumber)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    using (var stream = new MemoryStream())
+                    {
+                        file.CopyTo(stream);
+                        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                        using (var package = new ExcelPackage(stream))
+                        {
+
+                            var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+                            if (worksheet != null)
+                            {
+
+                                var products = new List<UploadPOItem>();
+                                int rowCount = worksheet.Dimension.Rows;
+                                for (int row = 5; row <= rowCount; row++) // Assuming the first row contains headers
+                                {
+
+
+                                    var product = new UploadPOItem
+
+                                    {
+                                        //Id = int.Parse(worksheet.Cells[row, 1].Value?.ToString()),
+                                        ItemName = worksheet.Cells[row, 2].Value?.ToString(),
+                                        Rate = worksheet.Cells[row, 6].Value?.ToString(),
+                                        Quantity = worksheet.Cells[row,4 ].Value?.ToString(),
+                                        Amount = worksheet.Cells[row, 7].Value?.ToString(),
+                                        PONumber=PONumber,
+                               
+                                       
+                                    };
+                                    PONumber = product.PONumber;
+
+                                    // product.Id = product.Id;
+                                    await scopedcontext.AddAsync(product);
+                                    await scopedcontext.SaveChangesAsync();
+                                    _logger.LogInformation("saved successfully");
+                                    //products.Add(product);
+                                    //await scopedcontext.SaveChangesAsync();
+
+                                }
+                                //foreach (var each_product in products)
+                                //{
+                                //    // Save the list of students to the database
+                                //    await scopedcontext.AddAsync(each_product);
+                                //    await scopedcontext.SaveChangesAsync();
+                                //}
+
+
+
+                                //_logger.LogInformation("Uploaded successfully");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation( ex.Message);
+            }
+
+           _logger.LogInformation( "Invalid file or file format.");
+
+        }
+        public async Task<StockResponse> GetItemsByPO(string PONumber)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var itemexists = await scopedcontext.UploadPOItem.Where(y => y.PONumber == PONumber).ToListAsync();
+                    if (itemexists == null)
+                    {
+                        return new StockResponse(false, "nothing to show ", null);
+                    }
+                    return new StockResponse(true, "Queried successfully", itemexists);
+
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> UploadingPO(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                // Handle the case where the file is not provided or empty
+                return new StockResponse(false, "Please provide a valid file.", null);
+            }
+
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    using (var stream = new MemoryStream())
+                    {
+                        file.CopyTo(stream);
+                        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                        using (var package = new ExcelPackage(stream))
+                        {
+                            var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+
+                            if (worksheet != null)
+                            {
+                                var products = new List<UploadPOFile>();
+                                int rowCount = worksheet.Dimension.Rows;
+
+                                int totalStock = 0;
+                                for (int row = 2; row <= rowCount; row++) // Assuming the first row contains headers
+                                {
+                                    string item_name = worksheet.Cells[row, 2].Value?.ToString();
+                                    int quantity = int.Parse(worksheet.Cells[row, 3].Value?.ToString());
+
+                                    var itemexists = await scopedcontext.UploadPOFile
+                                        .Where(x => x.ItemName == item_name)
+                                        .OrderByDescending(y => y.DateAdded)
+                                        .LastOrDefaultAsync();
+
+                                    var product = new UploadPOFile
+                                    {
+                                        PONumber = worksheet.Cells[row, 1].Value?.ToString(),
+                                        ItemName = item_name,
+                                        Quantity = int.Parse(worksheet.Cells[row, 3].Value?.ToString()),
+                                        Rate = worksheet.Cells[row, 4].Value?.ToString(),
+                                        Amount = worksheet.Cells[row, 5].Value?.ToString(),
+                                        Warranty = int.Parse(worksheet.Cells[row, 6].Value?.ToString()),
+                                        WarrantyStartDate = Convert.ToDateTime(worksheet.Cells[row, 7].Value?.ToString()),
+                                        CategoryName = worksheet.Cells[row, 8].Value?.ToString(),
+                                        DateAdded = DateTime.Now,
+                                        TotalStockIn=totalStock,
+                                       
+                                    };
+                                    product.OpeningStock = quantity;
+                                                                    
+                                    if (itemexists != null)
+                                    {                                     
+                                        product.AvailableStock = itemexists.AvailableStock + product.Quantity;
+                                        product.Quantity += itemexists.Quantity;
+
+                                    }
+                                    else
+                                    {
+                                        product.AvailableStock = 0;
+                                    }
+
+                                    product.AjustedQuantity = product.Quantity;
+                                    product.WarrantyEndDate = product.WarrantyStartDate.AddMonths(product.Warranty);
+                                    totalStock += product.AvailableStock;
+                                    product.TotalStockIn = totalStock;
+
+                                    products.Add(product);
+                                    
+                                }
+                                await scopedcontext.SaveChangesAsync();
+
+
+                                return new StockResponse(true, "Uploaded successfully", products);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+
+            return new StockResponse(false, "Item Already Saved.", null);
+        }
+
+        public async Task<StockResponse> GetAllPOSDetails()
+        {
+
+            try
+            {
+
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var allpos = await scopedcontext.UploadPOFile.ToListAsync();
+                   
+
+                    if (allpos == null)
+                    {
+                        return new StockResponse(false, "PO doesn't exist", null);
+                    }
+                    return new StockResponse(true, "Successfully queried", allpos);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+          public async Task<StockResponse> GetItemsByPOS(string PONumber)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var itemexists = await scopedcontext.UploadPOFile.Where(y => y.PONumber == PONumber).ToListAsync();
+                    if (itemexists == null)
+                    {
+                        return new StockResponse(false, "nothing to show ", null);
+                    }
+                    return new StockResponse(true, "Queried successfully", itemexists);
+
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> AddPurchaseOrdersDetails(PurchaseOrderssvm purchaseOrderssvm)
+        {
+            try
+            {
+                if (purchaseOrderssvm.PONumber == "")
+                {
+
+                    return new StockResponse(false, "Kindly provide PO number to add Purchase order", null);
+                }
+                if (purchaseOrderssvm.PODate == null)
+                {
+                    return new StockResponse(false, "Kindly provide PO Date", null);
+
+                }
+                if (purchaseOrderssvm.Vendor == "")
+                {
+                    return new StockResponse(false, "Kindly provide vendor", null);
+
+                }
+              
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+
+
+                    var poexistss = await scopedcontext.PurchaseOrderss.Where(x => x.PONumber == purchaseOrderssvm.PONumber).FirstOrDefaultAsync();
+
+                    if (poexistss != null)
+                    {
+                        return new StockResponse(false, $" Purchase Order  '{purchaseOrderssvm.PONumber}' already exists", null);
+                    }
+
+                    var purchaseorderss = new PurchaseOrderss
+                    {
+                        PONumber = purchaseOrderssvm.PONumber,
+                        PODate = purchaseOrderssvm.PODate,
+                        Vendor = purchaseOrderssvm.Vendor,
+
+                    };
+
+                    await scopedcontext.AddAsync(purchaseorderss);
+                    await scopedcontext.SaveChangesAsync();
+                    return new StockResponse(true, $"Purchase Order '{purchaseOrderssvm.PONumber}'  created successfully", null);
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+
+            }
+
+        }
+        public async Task<StockResponse> GetAllPurchaseOrderDetails()
+        {
+
+            try
+            {
+
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var allpos = await scopedcontext.PurchaseOrderss.ToListAsync();
+
+
+                    if (allpos == null)
+                    {
+                        return new StockResponse(false, "PO doesn't exist", null);
+                    }
+                    return new StockResponse(true, "Successfully queried", allpos);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> AdjustStock(AdjustStockvm adjustStockvm)
+        {
+
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var lastupdate = await scopedcontext.UploadPOFile.Where(y => y.ID == adjustStockvm.ItemID)
+                      .FirstOrDefaultAsync();
+
+                    if (lastupdate == null)
+                    {
+                      return new StockResponse(false, "item not found", null);
+                    }
+
+                    var Items = new AdjustStock
+                    {
+                        QuantityDamaged = adjustStockvm.QuantityDamaged,
+                        Description = adjustStockvm.Description,
+                        
+             
+
+                    };
+                    Items.ItemID = lastupdate.ID;
+                  
+                    lastupdate.AjustedQuantity -= Items.QuantityDamaged;
+                    scopedcontext.Update(lastupdate);
+                  await scopedcontext.AddAsync(Items);
+                    await scopedcontext.SaveChangesAsync();
+                    return new StockResponse(true, " updated successfully", Items);
+
+                }
+
+
+                //lastupdate.AvailableStock = quantityadded + lastupdate.AvailableStock;
+                //if (lastupdate.AvailableStock > lastupdate.ReOrderLevel)
+                //{
+                //    lastupdate.Status = "Good";
+                //}
+                //else if (lastupdate.AvailableStock < lastupdate.ReOrderLevel && lastupdate.AvailableStock > 0)
+                //{
+                //    lastupdate.Status = "Low";
+                //}
+                //else
+                //{
+                //    lastupdate.Status = "Out";
+                //}
+
+                
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> GetPOItemsByID(int ItemId)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var itemexists = await scopedcontext.UploadPOFile.Where(u => u.ID == ItemId).FirstOrDefaultAsync();
+                    if (itemexists == null)
+                    {
+                        return new StockResponse(false, "not found", null);
+                    }
+                    return new StockResponse(true, "Queried successfully", itemexists);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> GetAdjustedStockById(int ItemID)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var itemexist = await scopedcontext.AdjustStock.Where(u => u.ItemID == ItemID).ToListAsync();
+                    if (itemexist == null)
+                    {
+                        return new StockResponse(false, "not found", null);
+                    }
+                    return new StockResponse(true, "Queried successfully", itemexist);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> GetAllItemStock()
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var allstock = await scopedcontext.UploadPOFile.OrderByDescending(x => x.DateAdded).ToListAsync();
+
+
+                    if (allstock == null || allstock.Count == 0)
+                    {
+                        return new StockResponse(false, "Stock doesn't exist", null);
+                    }
+
+                    Dictionary<string, AllStockListItems> stockDictionary = new Dictionary<string, AllStockListItems>();
+
+                    foreach (var stock in allstock)
+                    {
+                        if (!stockDictionary.TryGetValue(stock.ItemName, out var existingStock))
+                        {
+                            var newStockItem = new AllStockListItems
+                            {
+                                ItemName = stock.ItemName,
+                                OpeningStock = stock.OpeningStock,
+                               // AvailableStock = stock.AvailableStock,
+                                DateAdded = stock.DateAdded,
+                                Quantity=stock.Quantity,
+                                AvailableStock=stock.AvailableStock,
+                                StockOut=stock.StockOut,
+                                
+                            };
+                            
+                            stockDictionary.Add(stock.ItemName, newStockItem);
+                        }
+                        //else
+                        //{
+                        //    // Update existing stock quantities
+                        //    existingStock.Quantity += stock.Quantity;
+                        //    existingStock.AvailableStock += stock.AjustedQuantity;
+                           
+                        //}
+                   
+                    }
+
+                    // Process issued quantities and update available stock
+                 
+                    //foreach (var stock in stockDictionary.Values)
+                    //{
+                    //    var itemexists = await scopedcontext.IssueProcess
+                    //        .Where(u => u.ItemName == stock.ItemName)
+                    //        .FirstOrDefaultAsync();
+
+                    //    if (itemexists != null)
+                    //    {
+                    //        stock.StockOut += itemexists.Quantity;
+                    //        stock.AvailableStock -= itemexists.Quantity; // Deduct stock out quantity
+                    //    }
+                    //}
+                    // Convert the dictionary values to a list
+                    List<AllStockListItems> stockList = stockDictionary.Values.ToList();
+
+                    return new StockResponse(true, "Successfully queried", stockList);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+
+        public async Task<StockResponse> ApplyRequisition(AddRequisition addRequisition)
+        {
+            try
+            {
+                if (addRequisition.BrandName == "")
+                {
+
+                    return new StockResponse(false, "Kindly provide  brand name", null);
+                }
+                if (addRequisition.itemName == "")
+                {
+
+                    return new StockResponse(false, "Kindly provide  item name ", null);
+                }
+                if (addRequisition.Quantity == 0)
+                {
+
+                    return new StockResponse(false, "Kindly provide quantity", null);
+                }
+                if (addRequisition.clientName == "")
+                {
+
+                    return new StockResponse(false, "Kindly provide customer name ", null);
+                }
+                if (addRequisition.DeviceBeingRepaired == "")
+                {
+                    return new StockResponse(false, "Kindly provide device being repaired ", null);
+                }
+                if (addRequisition.Department == "")
+                {
+                    return new StockResponse(false, "Kindly provide department details", null);
+                }
+                if (addRequisition.clientName == "")
+                {
+                    return new StockResponse(false, "Kindly provide client details", null);
+                }
+                if (addRequisition.Requisitioner == "")
+                {
+                    return new StockResponse(false, "Kindly provide person requisitioning ", null);
+                }
+
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var itemexists = await scopedcontext.RequisitionForm
+                    .Where(y => y.BrandName == addRequisition.BrandName &&
+                    y.itemName == addRequisition.itemName).FirstOrDefaultAsync();
+                    if (itemexists == null)
+                    {
+                        return new StockResponse(false, "Does not exist", null);
+                    }
+
+
+
+                    var itemclass = new RequisitionForm
+                    {
+                        BrandName = addRequisition.BrandName,
+                        itemName = addRequisition.itemName,
+                        Quantity = addRequisition.Quantity,
+                        clientName = addRequisition.clientName,
+                        DeviceBeingRepaired = addRequisition.DeviceBeingRepaired,
+                        IssuedByDate = DateTime.Now,
+                        Department = addRequisition.Department,
+                        Description=addRequisition.Description,
+                        Requisitioner=addRequisition.Requisitioner,
+                        ApprovedStatus="Waiting For Approval",
+                        stockNeed=addRequisition.stockNeed,
+                        Purpose=addRequisition.Purpose,
+                        ApprovedDate=DateTime.Now,
+
+
+
+
+
+
+                    };
+
+                    //itemexists.Quantity -= addSalesOrdersVm.Quantity;
+                    //itemexists.StockOut += addSalesOrdersVm.Quantity;
+                    //if (itemexists.AvailableStock == 0)
+                    //{
+                    //    return new StockResponse(false, "No available stock please restock first....", null);
+                    //}
+                    //if (itemexists.AvailableStock < itemclass.Quantity)
+                    //{
+                    //    return new StockResponse(false, $"Note:You can only stockOut from '{itemexists.AvailableStock}'!!! ", null);
+                    //}
+                    //itemexists.AvailableStock -= addSalesOrdersVm.Quantity;
+
+                    //if (itemexists.AvailableStock > itemexists.ReOrderLevel)
+                    //{
+                    //    itemexists.Status = "Good";
+                    //}
+                    //else if (itemexists.AvailableStock < itemexists.ReOrderLevel && itemexists.AvailableStock > 0 || itemexists.AvailableStock == itemexists.ReOrderLevel)
+                    //{
+                    //    itemexists.Status = "Low";
+                    //}
+                    //else
+                    //{
+                    //    itemexists.Status = "Out";
+                    //}
+                    //if (itemexists.AvailableStock < itemexists.ReOrderLevel || itemexists.AvailableStock == itemexists.ReOrderLevel)
+                    //{
+                    //    itemexists.ReorderRequired = "Yes";
+                    //}
+                    //else
+                    //{
+                    //    itemexists.ReorderRequired = "No";
+                    //}
+
+
+
+                    await scopedcontext.AddAsync(itemclass);
+                    await scopedcontext.SaveChangesAsync();
+                    return new StockResponse(true, "Requisition has been sent successfully", null);
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+
+            }
+
+        }
+        public async Task<StockResponse> ApplyRequisitionForm(ApplyRequistionvm addRequisition)
+        {
+            try
+            {
+                if (addRequisition.BrandName == "")
+                {
+
+                    return new StockResponse(false, "Kindly provide  brand name", null);
+                }
+                if (addRequisition.itemName == "")
+                {
+
+                    return new StockResponse(false, "Kindly provide  item name ", null);
+                }
+                if (addRequisition.Quantity == 0)
+                {
+
+                    return new StockResponse(false, "Kindly provide quantity", null);
+                }
+                if (addRequisition.clientName == "")
+                {
+
+                    return new StockResponse(false, "Kindly provide customer name ", null);
+                }
+                if (addRequisition.DeviceBeingRepaired == "")
+                {
+                    return new StockResponse(false, "Kindly provide device being repaired ", null);
+                }
+                if (addRequisition.Department == "")
+                {
+                    return new StockResponse(false, "Kindly provide department details", null);
+                }
+                if (addRequisition.clientName == "")
+                {
+                    return new StockResponse(false, "Kindly provide client details", null);
+                }
+                //if (addRequisition.Requisitioner == "")
+                //{
+                //    return new StockResponse(false, "Kindly provide person requisitioning ", null);
+                //}
+
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    //var itemexists = await scopedcontext.UploadPOFile
+                    //.Where(y => y.ItemName == addRequisition.itemName).FirstOrDefaultAsync();
+                    //if (itemexists == null)
+                    //{
+                    //    return new StockResponse(false, "Does not exist", null);
+                    //}
+                    //Console.WriteLine("Initial AvailableStock: " + itemexists.AvailableStock);
+
+
+                    //if (itemexists.AvailableStock < addRequisition.Quantity)
+                    //{
+                    //    addRequisition.ApprovedStatus = "Failed";
+                    //    addRequisition.RejectReason = "Insufficient stock";
+                    //    return new StockResponse(false, $"Insufficient stock for the requisition,Please apply from '{itemexists.AvailableStock}' and below ", itemexists);
+
+
+
+                    //}
+                    var loggedinuserobject = await _extraServices.LoggedInUser();
+
+                    if (loggedinuserobject == null)
+                    {
+
+                        return new StockResponse(false, "user not logged in. login again", null);
+
+                    }
+                    var useremails = loggedinuserobject.Email;
+                    var userName = loggedinuserobject.FirstName + ' ' + loggedinuserobject.LastName;
+                    var availableStockResponse = await GetAllItemStock();
+
+                    if (!availableStockResponse.isTrue || !(availableStockResponse.Body is List<AllStockListItems> stockList))
+                    {
+                        return new StockResponse(false, "Error retrieving available stock information", null);
+                    }
+
+                   
+
+                    AllStockListItems itemExistsInStock = null;
+
+                    foreach (var stock in stockList)
+                    {
+                        if (stock.ItemName == addRequisition.itemName)
+                        {
+                            itemExistsInStock = stock;
+                            break;
+                        }
+                    }
+
+                    if (itemExistsInStock == null)
+                    {
+                        return new StockResponse(false, "Item does not exist in stock", null);
+                    }
+
+
+
+                    var itemclass = new ApplyRequistionForm
+                    {
+                        BrandName = addRequisition.BrandName,
+                        itemName = addRequisition.itemName,
+                        Quantity = addRequisition.Quantity,
+                        clientName = addRequisition.clientName,
+                        DeviceBeingRepaired = addRequisition.DeviceBeingRepaired,
+                        IssuedByDate = DateTime.Now,
+                        Department = addRequisition.Department,
+                        Description = addRequisition.Description,
+                        Requisitioner =userName,
+                        ApprovedStatus = "Pending",
+                        stockNeed = addRequisition.stockNeed,
+                        Purpose = addRequisition.Purpose,
+                        ApprovedDate = DateTime.Now,
+                        useremail=useremails
+                    };
+
+                    if (itemExistsInStock.AvailableStock < itemclass.Quantity)
+                    {
+                        itemclass.ApprovedStatus = "Failed";
+                        itemclass.RejectReason = $"Insufficient stock." +
+                            $"Available stock: {itemExistsInStock.AvailableStock}";
+                        return new StockResponse(false, $"Insufficient stock for the requisition. Available stock: {itemExistsInStock.AvailableStock}", itemExistsInStock);
+                    }
+
+                    await scopedcontext.AddAsync(itemclass);
+                    await scopedcontext.SaveChangesAsync();
+
+                    await _iemail_service.MakerEmail();
+                    return new StockResponse(true, "Requisition has been sent successfully", itemclass);
+
+
+
+
+
+
+                }
+
+
+
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+
+            }
+
+
+
+        }
+        public async Task<StockResponse> ApplicationStatus(ApprovalProcessvm approvalProcessvm)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var loggedinuserobject = await _extraServices.LoggedInUser();
+
+                    var userEmail = loggedinuserobject.FirstName + ' ' + loggedinuserobject.LastName;
+
+                    if (loggedinuserobject == null)
+                    {
+
+                        return new StockResponse(false, "user not logged in. login again", null);
+
+                    }
+
+                    var applieditem = await scopedcontext.ApplyRequistionForm.Where(u => u.ID == approvalProcessvm.id).FirstOrDefaultAsync();
+                    if (applieditem == null)
+                    {
+                        return new StockResponse(false, "not found", null);
+                    }
+                    //var quantityexists = await scopedcontext.UploadPOFile.Where(y => y.ItemName == applieditem.itemName).FirstOrDefaultAsync();
+                    //if (quantityexists == null)
+                    //{
+                    //    return new StockResponse(false, "item does not exist", null);
+
+                    //}
+                    //if (quantityexists.AvailableStock < applieditem.Quantity)
+                    //{
+                    //    applieditem.ApprovedStatus = "Failed";
+                    //    applieditem.RejectReason = "Not Available";
+
+
+                    //       return new StockResponse(false, $"Note:You can only apply  from '{quantityexists.AvailableStock} and below'!!! ", applieditem);
+
+
+                    //{
+                    //    applieditem.ApprovedStatus = "Failed";
+                    //    applieditem.RejectReason = "Not Available";
+
+                    //    return new StockResponse(false, $"Note:You can only apply  from '{quantityexists.AvailableStock}'!!! ", null);
+
+                    //}
+
+                    if (approvalProcessvm.selectedOption == "Approve")
+                    {
+                        approvalProcessvm.RejectedReason = "";
+                    }
+               
+                    applieditem.selectedOption = approvalProcessvm.selectedOption;
+                    applieditem.ApprovedDate = DateTime.Now;
+                    applieditem.RejectReason = approvalProcessvm.RejectedReason;
+                    applieditem.ApprovedBy = userEmail;
+                    if (approvalProcessvm.selectedOption == "Reject")
+                    {
+                        applieditem.ApprovedStatus = "Rejected";
+
+                    }
+                    else
+                    {
+                        applieditem.ApprovedStatus = "Approved";
+                    }
+                 
+                    scopedcontext.Update(applieditem);
+                    await scopedcontext.SaveChangesAsync();
+                    
+                    if(approvalProcessvm.selectedOption == "Reject")
+                    {
+                        var new_mail = new emailbody
+                        {
+                          ToEmail=applieditem.useremail,
+                          PayLoad="Your request has been Rejected",
+                          UserName="N/A",
+                        };
+                        await _iemail_service.send_status_to_Requester( new_mail);
+                    }
+                    else if (approvalProcessvm.selectedOption == "Approve")
+                    {
+                       var new_mail = new emailbody
+                        {
+                          ToEmail=applieditem.useremail,
+                          PayLoad="Your request has been approved",
+                          UserName="N/A"
+                        };
+                        await _iemail_service.send_status_to_Requester( new_mail);
+                        await _iemail_service.IssuerEmail();
+                    }
+                    else
+                    {
+                        var new_mail = new emailbody
+                        {
+                            ToEmail = applieditem.useremail,
+                            PayLoad = "Your request has been Rejected",
+                            UserName = "N/A",
+                        };
+                        await _iemail_service.send_status_to_Requester(new_mail);
+
+                    }
+                    return new StockResponse(true, "Successfully updated", applieditem);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> GetAllRequisitionApplication()
+        {
+
+            try
+            {
+
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var allbrands = await scopedcontext.ApplyRequistionForm.ToListAsync();
+
+                    if (allbrands == null)
+                    {
+                        return new StockResponse(false, "Requisition doesn't exist", null);
+                    }
+                    return new StockResponse(true, "Successfully queried", allbrands);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> GetRequisitionbyId(int Id)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var supplierexists = await scopedcontext.ApplyRequistionForm.Where(u => u.ID == Id).ToListAsync();
+                    if (supplierexists == null)
+                    {
+                        return new StockResponse(false, "not found", null);
+                    }
+                    return new StockResponse(true, "Queried successfully", supplierexists);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> IssueProcess(int id)
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var applieditem = await scopedcontext.ApplyRequistionForm.Where(u => u.ID == id).FirstOrDefaultAsync();
+                    var loggedinuserobject = await _extraServices.LoggedInUser();
+                    var userEmail = loggedinuserobject.FirstName + ' ' + loggedinuserobject.LastName;
+
+                    if (loggedinuserobject == null)
+                    {
+                        return new StockResponse(false, "User not logged in. Please log in again.", null);
+                    }
+
+                    if (applieditem == null)
+                    {
+                        return new StockResponse(false, "Item not found.", null);
+                    }
+
+                    if (applieditem.ApprovedStatus == "Rejected")
+                    {
+                        return new StockResponse(false, "Check reason for rejection and revise again.", null);
+                    }
+                    
+
+                    // Retrieve the items with the same itemName from UploadPOFile
+                    var itemsWithSameName = await scopedcontext.UploadPOFile
+                        .Where(u => u.ItemName == applieditem.itemName)
+                        .OrderByDescending(y => y.DateAdded)
+                        .FirstOrDefaultAsync();
+      
+                    //var issueResponses = new List<StockResponse>();
+
+                    //foreach (var item in itemsWithSameName)
+                    //{
+                        var itemclass = new IssueProcess
+                        {
+                            IssueStatus = "Issued",
+                            IssuedBy = userEmail,
+                            DateIssued = DateTime.Now
+                        };
+
+                        itemclass.Quantity = applieditem.Quantity;
+                        itemclass.ItemName = applieditem.itemName;
+                        itemclass.FormID = applieditem.ID;
+                        applieditem.ApprovedStatus = itemclass.IssueStatus;
+                        itemsWithSameName.StockOut += itemclass.Quantity;
+
+                        if (itemsWithSameName.AvailableStock < itemclass.Quantity)
+                        {
+                     new StockResponse(false, $"Not enough available stock to issue {itemclass.Quantity} units for item {itemclass.ItemName}.", null);
+                        }
+                        else
+                        {
+                        // Update stock quantities
+                        itemsWithSameName.AvailableStock = itemsWithSameName.AvailableStock - applieditem.Quantity;
+                        
+
+
+                        // Save changes to the database
+                         scopedcontext.Update(itemclass);
+                            await scopedcontext.SaveChangesAsync();
+
+                        new StockResponse(true, $"Successfully issued and updated for item {itemclass.ItemName}.", itemclass);
+                        }
+                    }
+
+                    return new StockResponse(true, "Issue process completed.", null);
+               
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+
+        public async Task<StockResponse> GetRequisitionByEmail()
+        {
+            try
+            {
+
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var loggedinuserobject =await _extraServices.LoggedInUser();
+                    var useremailexists = await scopedcontext.ApplyRequistionForm.Where(u => u.useremail == loggedinuserobject.Email).ToListAsync();
+                    if (useremailexists == null)
+                    {
+                        return new StockResponse(false, "not found", null);
+                    }
+                    return new StockResponse(true, "Queried successfully", useremailexists);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> GetFormByStatusPending()
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var supplierexists = await scopedcontext.ApplyRequistionForm.Where(u => u.ApprovedStatus =="Pending").OrderByDescending(x=>x.ApprovedDate).ToListAsync();
+                    if (supplierexists == null)
+                    {
+                        return new StockResponse(false, "not found", null);
+                    }
+                    return new StockResponse(true, "Queried successfully", supplierexists);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+        public async Task<StockResponse> GetFormStatusApproved()
+        {
+            try
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+                    var supplierexists = await scopedcontext.ApplyRequistionForm.Where(u => u.ApprovedStatus == "Approved").OrderByDescending(x => x.ApprovedDate).ToListAsync();
+                    if (supplierexists == null)
+                    {
+                        return new StockResponse(false, "not found", null);
+                    }
+                    return new StockResponse(true, "Queried successfully", supplierexists);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new StockResponse(false, ex.Message, null);
+            }
+        }
+
+
+
+
+
+
     }
 }
+    
+
+
+    
+
+
+
+    
+
 

@@ -67,5 +67,14 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.DataContext
        public DbSet<AddPart> AddPart { get; set; }
         public DbSet<AddSpareParts> AddSpareParts { get; set; }
         public DbSet<ProductNumbering> ProductNumbering { get; set; }
+        public DbSet<PODetails> PODetails { get; set; }
+        public DbSet<UploadPOItem> UploadPOItem { get; set; }
+        public DbSet<UploadPOFile> UploadPOFile { get; set; }
+        public DbSet<PurchaseOrderss> PurchaseOrderss { get; set; }
+        public DbSet<AdjustStock> AdjustStock { get; set; }
+      // public DbSet<UploadPOFiles> UploadPOFiles { get; set; }
+        public DbSet<RequisitionForm> RequisitionForm { get; set; }
+        public DbSet<ApplyRequistionForm> ApplyRequistionForm { get; set; }
+        public DbSet<IssueProcess> IssueProcess { get; set; }
     }
 }

@@ -15,5 +15,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IEmai
         Task<mailresponse> SendEmailOnLeaveCompletion(EmailbodyOnLeaveEnd emailvm);
         Task<mailresponse> EmailOnCreatedUser(EmailbodyOnCreatedUser usermailvm);
         Task<mailresponse> SendForgotPasswordLink(emailbody emailvm);
+       // Task<mailresponse> Send_On_Approval_to_Approver(emailbody emailvm);
+        Task<mailresponse> send_status_to_Requester(emailbody emailvm);
+        Task<mailresponse> Send_On_Issued(emailbody emailvm);
+        Task IssuerEmail();
+        Task MakerEmail();
     }
 }

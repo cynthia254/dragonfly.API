@@ -1,13 +1,16 @@
 {
   "version": 2,
-  "dgSpecHash": "IVaD7RrtTmF8a1NeFlF9UImk+x2Tk0YAEYr3qwPjqoGMbMzaPhyfqPLQTiFs1ewkf0FrCT1pSQCYZkumlNiAiA==",
+  "dgSpecHash": "S5DXz0NhHNozNuREsS6Bi9YiPifQ2XFeJ1EZv5KjCGXu4ZBgjXtcDq5siyLyX5Z9M5bQPvd759OP3T2cttHI1w==",
   "success": true,
   "projectFilePath": "C:\\Users\\user.DESKTOP-OMQ89VA\\Desktop\\PayhouseDragonFly\\PayhouseDragonFly.CORE\\PayhouseDragonFly.CORE.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\bouncycastle\\1.8.9\\bouncycastle.1.8.9.nupkg.sha512",
     "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\enums.net\\4.0.0\\enums.net.4.0.0.nupkg.sha512",
+    "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\itextsharp\\5.5.13.3\\itextsharp.5.5.13.3.nupkg.sha512",
     "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\mathnet.numerics.signed\\4.15.0\\mathnet.numerics.signed.4.15.0.nupkg.sha512",
     "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\7.0.5\\microsoft.aspnetcore.cryptography.internal.7.0.5.nupkg.sha512",
     "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\7.0.5\\microsoft.aspnetcore.cryptography.keyderivation.7.0.5.nupkg.sha512",
+    "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\microsoft.aspnetcore.http.features\\2.2.0\\microsoft.aspnetcore.http.features.2.2.0.nupkg.sha512",
     "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\7.0.0\\microsoft.extensions.caching.abstractions.7.0.0.nupkg.sha512",
     "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\7.0.0\\microsoft.extensions.dependencyinjection.7.0.0.nupkg.sha512",
     "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\7.0.0\\microsoft.extensions.dependencyinjection.abstractions.7.0.0.nupkg.sha512",
@@ -35,7 +38,29 @@
     "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\system.security.cryptography.xml\\6.0.1\\system.security.cryptography.xml.6.0.1.nupkg.sha512",
     "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\system.security.permissions\\6.0.0\\system.security.permissions.6.0.0.nupkg.sha512",
     "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\system.text.encoding.codepages\\6.0.0\\system.text.encoding.codepages.6.0.0.nupkg.sha512",
-    "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512"
+    "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512",
+    "C:\\Users\\user.DESKTOP-OMQ89VA\\.nuget\\packages\\zxing.net\\0.16.9\\zxing.net.0.16.9.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'BouncyCastle 1.8.9' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net6.0'. This package may not be fully compatible with your project.",
+      "libraryId": "BouncyCastle",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'iTextSharp 5.5.13.3' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net6.0'. This package may not be fully compatible with your project.",
+      "libraryId": "iTextSharp",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    }
+  ]
 }

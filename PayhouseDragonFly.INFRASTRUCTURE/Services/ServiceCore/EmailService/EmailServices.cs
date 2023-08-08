@@ -1,11 +1,14 @@
 ﻿using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.DTOs.EmaillDtos;
 using PayhouseDragonFly.CORE.Models.Emails;
+using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IEmailServices;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
@@ -15,13 +18,15 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
 
         private readonly ILogger<IEmailServices> _logger;
         private readonly EmailConfiguration _emailconfig;
+        private IServiceScopeFactory _scopefactory;
 
-        public EmailServices(IOptions<EmailConfiguration> emailconfig,
+        public EmailServices(IOptions<EmailConfiguration> emailconfig, IServiceScopeFactory scopefactory,
             ILogger<IEmailServices> logger
             )
         {
             _emailconfig = emailconfig.Value;
             _logger = logger;
+            _scopefactory = scopefactory;
 
         }
 
@@ -65,14 +70,14 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
                 str.Close();
                 MailText = MailText.Replace("verificationstring", _emailconfig.SmtpUser)
                     .Replace("user", _emailconfig.SmtpUser)
-                 
+
                     .Replace("sentTime", Convert.ToString(DateTime.Now));
                 var builder = new BodyBuilder { HtmlBody = MailText };
                 email.Body = builder.ToMessageBody();
                 email.To.Add(MailboxAddress.Parse(emailvm.ToEmail));
                 email.Subject = "Payhouse test mail";
                 using var smtp = new SmtpClient();
-                smtp.Connect(_emailconfig.SmtpHost, Convert.ToInt32(_emailconfig.SmtpPort), 
+                smtp.Connect(_emailconfig.SmtpHost, Convert.ToInt32(_emailconfig.SmtpPort),
                     MailKit.Security.SecureSocketOptions.StartTls);
                 smtp.Authenticate(_emailconfig.EmailFrom, _emailconfig.SmtpPass);
                 var resp = await smtp.SendAsync(email);
@@ -98,7 +103,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
                 StreamReader str = new StreamReader(file);
                 string MailText = await str.ReadToEndAsync();
                 str.Close();
-                var datesent = String.Format("{0:dd/MM/yyyy}", DateTime.Now); 
+                var datesent = String.Format("{0:dd/MM/yyyy}", DateTime.Now);
                 MailText = MailText.Replace("subject", emailvm.UserName)
                     .Replace("user", _emailconfig.SmtpUser)
                      .Replace("emailsentdate", datesent)
@@ -116,7 +121,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
                 smtp.Disconnect(true);
                 _logger.LogInformation("____________________ 4 email sender links ________________________________");
                 _logger.LogInformation($"Email on registration sent successfully {DateTime.Now}");
-                return new mailresponse(true, "mail sent successfully");         
+                return new mailresponse(true, "mail sent successfully");
             }
             catch (Exception ex)
             {
@@ -129,7 +134,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
         //send email on leave completion
 
 
-        public async Task<mailresponse> SendEmailOnLeaveCompletion(EmailbodyOnLeaveEnd emailvm) 
+        public async Task<mailresponse> SendEmailOnLeaveCompletion(EmailbodyOnLeaveEnd emailvm)
         {
             try
             {
@@ -142,9 +147,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
                 var datesent = String.Format("{0:dd/MM/yyyy}", DateTime.Now);
                 MailText = MailText.Replace("subject", emailvm.UserName)
                     .Replace("user", _emailconfig.SmtpUser)
-                    .Replace("Names",emailvm.Names)
-                    .Replace("leaveEndDate",Convert.ToString(emailvm.LeaveEndDate));
-                   
+                    .Replace("Names", emailvm.Names)
+                    .Replace("leaveEndDate", Convert.ToString(emailvm.LeaveEndDate));
+
                 var builder = new BodyBuilder { HtmlBody = MailText };
                 email.Body = builder.ToMessageBody();
                 email.To.Add(MailboxAddress.Parse(emailvm.ToEmail));
@@ -170,7 +175,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
 
         //email on created user
 
-        public async Task<mailresponse>EmailOnCreatedUser(EmailbodyOnCreatedUser usermailvm)
+        public async Task<mailresponse> EmailOnCreatedUser(EmailbodyOnCreatedUser usermailvm)
         {
             try
             {
@@ -180,8 +185,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
                 StreamReader str = new StreamReader(file);
                 string MailText = await str.ReadToEndAsync();
                 str.Close();
-                var datesent =  DateTime.Now.ToString("dddd, dd MMMM yyyy");
-                var datecreated=  usermailvm.CreatedDate.ToString("dddd, dd MMMM yyyy");
+                var datesent = DateTime.Now.ToString("dddd, dd MMMM yyyy");
+                var datecreated = usermailvm.CreatedDate.ToString("dddd, dd MMMM yyyy");
                 MailText = MailText.Replace("subject", "Notification on User Creation")
                     .Replace("usermail", _emailconfig.SmtpUser)
                     .Replace("emailsentdate", datesent)
@@ -227,7 +232,120 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
                     .Replace("receivernames", emailvm.UserName)
                     .Replace("emailsentdate", datesent)
                     .Replace("providedlink", emailvm.PayLoad);
-                    
+
+                var builder = new BodyBuilder { HtmlBody = MailText };
+                email.Body = builder.ToMessageBody();
+                email.To.Add(MailboxAddress.Parse(emailvm.ToEmail));
+                email.Subject = "Reset Password";
+                using var smtp = new SmtpClient();
+                smtp.Connect(_emailconfig.SmtpHost, Convert.ToInt32(_emailconfig.SmtpPort),
+                    MailKit.Security.SecureSocketOptions.StartTls);
+                smtp.Authenticate(_emailconfig.EmailFrom, _emailconfig.SmtpPass);
+                var resp = await smtp.SendAsync(email);
+                _logger.LogInformation("____________________ 3 email sender links ________________________________");
+                smtp.Disconnect(true);
+                _logger.LogInformation("____________________ 4 email sender links ________________________________");
+                _logger.LogInformation($"Email on registration sent successfully {DateTime.Now}");
+                return new mailresponse(true, "mail sent successfully");
+            }
+            catch (Exception ex)
+            {
+
+                return new mailresponse(false, ex.Message);
+            }
+        }
+
+        public async Task<mailresponse> send_status_to_Requester(emailbody emailvm)
+        {
+            try
+            {
+                _logger.LogInformation($"_____________________1.  email sent on status to requester service started  at {DateTime.Now} _______________________________");
+                var file = @"Templates/Email/update_request_status.html";
+                var email = new MimeMessage { Sender = MailboxAddress.Parse(_emailconfig.SmtpUser) };
+                StreamReader str = new StreamReader(file);
+                string MailText = await str.ReadToEndAsync();
+                str.Close();
+                var datesent = String.Format("{0:dd/MM/yyyy}", DateTime.Now);
+                MailText = MailText
+                    //.Replace("receivernames", emailvm.UserName)
+                    .Replace("emailsentdate", datesent)
+                     .Replace("payload", emailvm.PayLoad);
+
+                var builder = new BodyBuilder { HtmlBody = MailText };
+                email.Body = builder.ToMessageBody();
+                email.To.Add(MailboxAddress.Parse(emailvm.ToEmail));
+                email.Subject = "Request Status";
+                using var smtp = new SmtpClient();
+                smtp.Connect(_emailconfig.SmtpHost, Convert.ToInt32(_emailconfig.SmtpPort),
+                    MailKit.Security.SecureSocketOptions.StartTls);
+                smtp.Authenticate(_emailconfig.EmailFrom, _emailconfig.SmtpPass);
+                var resp = await smtp.SendAsync(email);
+                _logger.LogInformation("____________________ 3 email sender links ________________________________");
+                smtp.Disconnect(true);
+                _logger.LogInformation("____________________ 4 email sender links ________________________________");
+                _logger.LogInformation($"Email on registration sent successfully {DateTime.Now}");
+                return new mailresponse(true, "mail sent successfully");
+            }
+            catch (Exception ex)
+            {
+
+                return new mailresponse(false, ex.Message);
+            }
+        }
+
+        public async Task<mailresponse> Send_On_Approval_to_Requester(emailbody emailvm)
+        {
+            try
+            {
+                _logger.LogInformation($"_____________________1.  email sent to requester service started  at {DateTime.Now} _______________________________");
+                var file = @"Templates/Email/send_to_Requester.html";
+                var email = new MimeMessage { Sender = MailboxAddress.Parse(_emailconfig.SmtpUser) };
+                StreamReader str = new StreamReader(file);
+                string MailText = await str.ReadToEndAsync();
+                str.Close();
+                var datesent = String.Format("{0:dd/MM/yyyy}", DateTime.Now);
+                MailText = MailText
+                    .Replace("receivernames", emailvm.UserName)
+                    .Replace("emailsentdate", datesent);
+                //.Replace("providedlink", emailvm.PayLoad);
+
+                var builder = new BodyBuilder { HtmlBody = MailText };
+                email.Body = builder.ToMessageBody();
+                email.To.Add(MailboxAddress.Parse(emailvm.ToEmail));
+                email.Subject = "Reset Password";
+                using var smtp = new SmtpClient();
+                smtp.Connect(_emailconfig.SmtpHost, Convert.ToInt32(_emailconfig.SmtpPort),
+                    MailKit.Security.SecureSocketOptions.StartTls);
+                smtp.Authenticate(_emailconfig.EmailFrom, _emailconfig.SmtpPass);
+                var resp = await smtp.SendAsync(email);
+                _logger.LogInformation("____________________ 3 email sender links ________________________________");
+                smtp.Disconnect(true);
+                _logger.LogInformation("____________________ 4 email sender links ________________________________");
+                _logger.LogInformation($"Email on registration sent successfully {DateTime.Now}");
+                return new mailresponse(true, "mail sent successfully");
+            }
+            catch (Exception ex)
+            {
+                return new mailresponse(false, ex.Message);
+            }
+        }
+
+        public async Task<mailresponse> Send_On_Issued(emailbody emailvm)
+        {
+            try
+            {
+                _logger.LogInformation($"_____________________1.  email sent on approval service started  at {DateTime.Now} _______________________________");
+                var file = @"Templates/Email/send_on_Approval.html";
+                var email = new MimeMessage { Sender = MailboxAddress.Parse(_emailconfig.SmtpUser) };
+                StreamReader str = new StreamReader(file);
+                string MailText = await str.ReadToEndAsync();
+                str.Close();
+                var datesent = String.Format("{0:dd/MM/yyyy}", DateTime.Now);
+                MailText = MailText
+                    .Replace("receivernames", emailvm.UserName)
+                    .Replace("emailsentdate", datesent)
+                    .Replace("providedlink", emailvm.PayLoad);
+
                 var builder = new BodyBuilder { HtmlBody = MailText };
                 email.Body = builder.ToMessageBody();
                 email.To.Add(MailboxAddress.Parse(emailvm.ToEmail));
@@ -251,14 +369,125 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.EmailService
         }
 
 
+
+        public async Task IssuerEmail()
+        {
+
+            try
+            {
+                using (var scope = _scopefactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var all_issures = await scopedcontext.PayhouseDragonFlyUsers.Where(y => y.Issuer == true).ToListAsync();
+
+                    foreach (var user in all_issures)
+                    {
+
+
+                        _logger.LogInformation($"_____________________1.  email sent to requester service started  at {DateTime.Now} _______________________________");
+                        var file = @"Templates/Email/sent_to_issuer.html";
+                        var email = new MimeMessage { Sender = MailboxAddress.Parse(_emailconfig.SmtpUser) };
+                        StreamReader str = new StreamReader(file);
+                        string MailText = await str.ReadToEndAsync();
+                        str.Close();
+                        var send_message = "A request has been approved kindly log in to issue ";
+                        var datesent = String.Format("{0:dd/MM/yyyy}", DateTime.Now);
+                        MailText = MailText
+                            .Replace("receivernames", user.FirstName)
+                            .Replace("emailsentdate", datesent).
+                             Replace("payload_message", send_message);
+
+                        var builder = new BodyBuilder { HtmlBody = MailText };
+                        email.Body = builder.ToMessageBody();
+                        email.To.Add(MailboxAddress.Parse(user.Email));
+                        email.Subject = "Approved Request";
+                        using var smtp = new SmtpClient();
+                        smtp.Connect(_emailconfig.SmtpHost, Convert.ToInt32(_emailconfig.SmtpPort),
+                            MailKit.Security.SecureSocketOptions.StartTls);
+                        smtp.Authenticate(_emailconfig.EmailFrom, _emailconfig.SmtpPass);
+                        var resp = await smtp.SendAsync(email);
+                        _logger.LogInformation("____________________ 3 email sender links ________________________________");
+                        smtp.Disconnect(true);
+                        _logger.LogInformation("____________________ 4 email sender links ________________________________");
+                        _logger.LogInformation($"Email on registration sent successfully {DateTime.Now}");
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation("___________******______", ex.Message);
+
+            }
+        }
+
+
+
+
+
+
+        public async Task MakerEmail()
+        {
+
+            try
+            {
+                using (var scope = _scopefactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    var all_issures = await scopedcontext.PayhouseDragonFlyUsers.Where(y => y.Checker == true).ToListAsync();
+
+                    foreach (var user in all_issures)
+                    {
+
+
+                        _logger.LogInformation($"_____________________1.  email sent to requester service started  at {DateTime.Now} _______________________________");
+                        var file = @"Templates/Email/checker_mail.html";
+                        var email = new MimeMessage { Sender = MailboxAddress.Parse(_emailconfig.SmtpUser) };
+                        StreamReader str = new StreamReader(file);
+                        string MailText = await str.ReadToEndAsync();
+                        str.Close();
+                        var send_message = "A request has been made , Kindly log in and provide the appropriate action ";
+                        var datesent = String.Format("{0:dd/MM/yyyy}", DateTime.Now);
+                        MailText = MailText
+                            .Replace("receivernames", user.FirstName)
+                            .Replace("emailsentdate", datesent).
+                             Replace("payload_message", send_message);
+
+                        var builder = new BodyBuilder { HtmlBody = MailText };
+                        email.Body = builder.ToMessageBody();
+                        email.To.Add(MailboxAddress.Parse(user.Email));
+                        email.Subject = "New Requisition Application";
+                        using var smtp = new SmtpClient();
+                        smtp.Connect(_emailconfig.SmtpHost, Convert.ToInt32(_emailconfig.SmtpPort),
+                            MailKit.Security.SecureSocketOptions.StartTls);
+                        smtp.Authenticate(_emailconfig.EmailFrom, _emailconfig.SmtpPass);
+                        var resp = await smtp.SendAsync(email);
+                        _logger.LogInformation("____________________ 3 email sender links ________________________________");
+                        smtp.Disconnect(true);
+                        _logger.LogInformation("____________________ 4 email sender links ________________________________");
+                        _logger.LogInformation($"Email on registration sent successfully {DateTime.Now}");
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation("___________******______", ex.Message);
+
+            }
+        }
     }
+
+}
 
 
     //send reset email
 
 
 
-}
+
 
 
     
