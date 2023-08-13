@@ -15,12 +15,13 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public string SerialNumber { get; set; }
         public string BrandName { get; set; } = "nothing";
         public string ItemName { get; set; } = "nothing";
-        public int IMEI1 { get; set; }
-        public int IMEI2 { get; set; }
+        public string IMEI1 { get; set; }
+        public string IMEI2 { get; set; }
         public DateTime WarrantyStartDate { get; set; }
         public DateTime WarrantyEndDate { get; set;
         }
         public string ProductStatus { get; set; } = "INCOMPLETE";
+        public string SerialStatus { get; set; } = "Not Issued";
 
 
     }

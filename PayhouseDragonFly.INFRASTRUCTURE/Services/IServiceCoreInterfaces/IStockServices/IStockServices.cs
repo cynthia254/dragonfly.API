@@ -105,5 +105,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStoc
       Task<StockResponse> GetRequisitionByEmail();
         Task<StockResponse> GetFormByStatusPending();
         Task<StockResponse> GetFormStatusApproved();
+         Task<StockResponse> SelectSerialNumber(SelectSerialvm selectSerialvm);
+         Task<StockResponse> GetSelectedSerials(int issueID);
+         Task<StockResponse> GetSerialByIssued();
     }
 }

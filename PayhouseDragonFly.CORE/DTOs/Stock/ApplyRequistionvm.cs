@@ -13,7 +13,7 @@ namespace PayhouseDragonFly.CORE.DTOs.Stock
         public string Description { get; set; }
         public string stockNeed { get; set; }
         public int Quantity { get; set; }
-        public string DeviceBeingRepaired { get; set; }
+        public string DeviceBeingRepaired { get; set; } = "N/A";
         public string clientName { get; set; }
         public string Department { get; set; }
         public string Purpose { get; set; }

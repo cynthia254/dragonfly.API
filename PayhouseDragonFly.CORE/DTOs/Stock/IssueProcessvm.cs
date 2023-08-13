@@ -14,6 +14,7 @@ namespace PayhouseDragonFly.CORE.DTOs.Stock
         public int Quantity { get; set; }
         public DateTime DateIssued { get; set; }=DateTime.Now;
         public string ItemName { get; set; } = "nothing to show here";
+        public string SerialNumber { get; set; } = "N/A";
 
     }
 }

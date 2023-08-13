@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.StockResponse;
 using PayhouseDragonFly.CORE.DTOs.Stock;
@@ -588,6 +590,7 @@ namespace PayhouseDragonFly.API.Controllers.Stock
             return await _stockServices.GetAdjustedStockById(ItemID);
 
         }
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("GetAllItemsStock")]
         public async Task<StockResponse> GetAllItemStock()
@@ -632,13 +635,12 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         public async Task<StockResponse> IssueProcess(int id)
         {
             var roleclaimname = "CanIssueStock";
-            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var loggedinuser = await _loggeinuser.LoggedInUser();
             var roleclaimtrue = await _roleservices
                 .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
 
             if (loggedinuser.RoleId > 0)
             {
-
                 if (roleclaimtrue)
                 {
                     return await _stockServices.IssueProcess(id);
@@ -652,8 +654,9 @@ namespace PayhouseDragonFly.API.Controllers.Stock
             else
             {
 
-                return new StockResponse(false, "You have no permission access this", null);
+                return new StockResponse(false, "You have no permission to access this", null);
             }
+
             return new StockResponse(false, "", null);
         }
         
@@ -664,17 +667,90 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         {
             return await _stockServices.GetRequisitionByEmail();
         }
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("GetFormWithStatusPending")]
         public async Task<StockResponse> GetFormByStatusPending()
         {
-            return await _stockServices.GetFormByStatusPending();
+            var roleclaimname = "CanViewPending";
+            var loggedinuser = await _loggeinuser.LoggedInUser();
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+
+            if (loggedinuser.RoleId > 0)
+            {
+                if (roleclaimtrue)
+                {
+                    return await _stockServices.GetFormByStatusPending();
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new StockResponse(false, "You have no permission access this", null);
+
+                }
+            }
+            else
+            {
+
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
+
+
+            return new StockResponse(false, "", null);
         }
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("GetFormStatusWithApproved")]
+     
         public async Task<StockResponse> GetFormStatusApproved()
         {
-            return await _stockServices.GetFormStatusApproved();
+            var roleclaimname = "CanViewApprovedStock";
+            var loggedinuser = await _loggeinuser.LoggedInUser();
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+
+            if (loggedinuser.RoleId > 0)
+            {
+                if (roleclaimtrue)
+                {
+                    return await _stockServices.GetFormStatusApproved();
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new StockResponse(false, "You have no permission access this", null);
+
+                }
+            }
+            else
+            {
+
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
+
+
+            return new StockResponse(false, "", null);
         }
+        [HttpPost]
+        [Route("SelectSerialNumber")]
+        public async Task<StockResponse> SelectSerialNumber(SelectSerialvm selectSerialvm)
+        {
+            return await _stockServices.SelectSerialNumber(selectSerialvm);
+        }
+
+        [HttpPost]
+        [Route("GetSelectedByIssueID")]
+        public async Task<StockResponse> GetSelectedSerials(int issueID)
+        {
+            return await _stockServices.GetSelectedSerials(issueID);
+        }
+        [HttpGet]
+        [Route("GetNotIssuedSerial")]
+        public async Task<StockResponse> GetSerialByIssued()
+        {
+            return await _stockServices.GetSerialByIssued();
+        }
+
     }
 }

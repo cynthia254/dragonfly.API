@@ -9,8 +9,8 @@ namespace PayhouseDragonFly.CORE.DTOs.Stock
     public class AddProductDetailvm
     {
         public string SerialNumber { get; set; }
-        public int IMEI1 { get; set; }
-        public int IMEI2 { get; set; }
+        public string IMEI1 { get; set; }
+        public string IMEI2 { get; set; }
         public string BrandName { get; set; } = "nothinh";
         public string ItemName { get; set; } = "nothing";
         public int BatchID { get; set; }

@@ -388,11 +388,13 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IMEI1")
-                        .HasColumnType("int");
+                    b.Property<string>("IMEI1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IMEI2")
-                        .HasColumnType("int");
+                    b.Property<string>("IMEI2")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ItemID")
                         .HasColumnType("int");
@@ -406,6 +408,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SerialStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -758,6 +764,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Department")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1013,6 +1023,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IssueId"));
 
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("DateIssued")
                         .HasColumnType("datetime2");
 
@@ -1188,6 +1202,30 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.ToTable("RequisitionForm");
                 });
 
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.SelectSerial", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("IssueID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SerialStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SelectSerial");
+                });
+
             modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.StockIn", b =>
                 {
                     b.Property<int>("StockID")
@@ -1234,6 +1272,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
+                    b.Property<int>("ActualQuantity")
+                        .HasColumnType("int");
+
                     b.Property<int>("AjustedQuantity")
                         .HasColumnType("int");
 
@@ -1243,6 +1284,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
 
                     b.Property<int>("AvailableStock")
                         .HasColumnType("int");
+
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
@@ -1266,10 +1311,25 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ProductStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<string>("Rate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReOrderLevel")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference_Number")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

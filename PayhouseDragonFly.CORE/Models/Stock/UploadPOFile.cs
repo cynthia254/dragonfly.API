@@ -15,20 +15,26 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public int Warranty { get; set; }
         public DateTime WarrantyStartDate { get; set; }
         public string Amount { get; set; }
+        public string Reference_Number { get; set; }
         public string Rate { get; set; }
         public string ItemName { get; set; }
+       public string BrandName { get; set; }
+        public int ReOrderLevel { get; set; }
         public string CategoryName { get; set; }
         public int Quantity { get; set; }
         public DateTime WarrantyEndDate { get; set; }
         public int AjustedQuantity { get; set; }
+        public string Status { get; set; } = "Not yet";
         public DateTime DateAdded { get; set; } = DateTime.Now;
         public int OpeningStock { get; set; }
         public int AvailableStock { get; set; }
         public int StockOut { get; set; }
         public string FileName { get; set; } = "unknown";
         public int TotalStockIn { get; set; }
+        public int ActualQuantity { get; set; }
+        public string ProductStatus { get; set; }
         //public string Status { get; set; } = "Incomplete";
         //public string Reference_Number { get; set; }
-        
+
     }
 }

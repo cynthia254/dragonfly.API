@@ -29,6 +29,7 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public string RejectReason { get; set; } = "Unknown";
         public string selectedOption { get; set; } = "Unknown";
         public string useremail { get; set; }
+        public string CategoryName { get; set;}="Unknown";
 
     }
 }

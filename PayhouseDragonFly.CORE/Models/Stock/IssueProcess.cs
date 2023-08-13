@@ -17,5 +17,8 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public int FormID { get; set; }
         public DateTime DateIssued { get; set; } = DateTime.Now;
         public string ItemName { get; set; }
+        public string CategoryName { get; set; }
+        //public string SerialNumber { get; set; } = "N/A";
+        //public string SerialStatus { get; set; }
     }
 }
