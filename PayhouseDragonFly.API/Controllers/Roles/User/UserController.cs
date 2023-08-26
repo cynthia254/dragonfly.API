@@ -608,6 +608,70 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
              return await  _userServices.SearchForUsers(search_query);
         }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("CanMakeIssuer")]
+        public async Task<BaseResponse> MakeIssuer(string useremail)
+        {
+            var roleclaimname = "CanMakeIssuer";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+
+            if (loggedinuser.RoleId > 0)
+            {
+
+                if (roleclaimtrue)
+                {
+                    return await _userServices.MakeIssuer(useremail);
+
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
+
+                }
+            }
+            else
+            {
+
+                return new BaseResponse("120", "You have no permission access this", null);
+            }
+            return new BaseResponse("", "", null);
+
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("MakeApprover")]
+        public async Task<BaseResponse> MakeApprover(string useremail)
+        {
+            var roleclaimname = "CanMakeApprover";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var roleclaimtrue = await _roleservices
+                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+
+            if (loggedinuser.RoleId > 0)
+            {
+
+                if (roleclaimtrue)
+                {
+                    return await _userServices.MakeApprover(useremail);
+
+                }
+                else if (!roleclaimtrue)
+                {
+                    return new BaseResponse("110", "You have no permission access this", null);
+
+                }
+            }
+            else
+            {
+
+                return new BaseResponse("120", "You have no permission access this", null);
+            }
+            return new BaseResponse("", "", null);
+
+        }
 
 
 

@@ -15,6 +15,8 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public string PONumber { get; set; }
         public DateTime PODate { get; set; }
         public string Vendor { get; set; }
-
+        public DateTime DateCreated { get; set; }
+        public string CaptureStatus { get; set; }
+        public string DeliveryStatus { get; set; }
     }
 }

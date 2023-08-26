@@ -77,5 +77,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.DataContext
         public DbSet<ApplyRequistionForm> ApplyRequistionForm { get; set; }
         public DbSet<IssueProcess> IssueProcess { get; set; }
         public DbSet<SelectSerial> SelectSerial { get; set; }
+        public DbSet<AddDeliveryNote> AddDeliveryNote { get; set; }
+        public DbSet<BatchNo> BatchNumber { get; set; }
+        public DbSet<StockAdjustment> StockAdjustment { get; set; }
+        public DbSet<ApprovalBatch> ApprovalBatch { get; set; }
+        public DbSet<POApproval> POApproval { get; set; }
     }
 }

@@ -69,7 +69,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStoc
         Task<string> GetGeneratedref();
         Task<StockResponse> GetInvoiceLinByNumber(string invoiceNumber);
         Task<StockResponse> GetInvoiceItemByID(int invoicelineId);
-        Task<StockResponse> GetProductDetailsbyid(int itemID);
+        Task<StockResponse> GetProductDetailsbyid(string BatchNumber);
         Task<StockResponse> GetProduct_Numbers_ByReference(string reference);
         Task<StockResponse> GetProduvctLineyId(int product_line_id);
         Task<StockResponse> SearchForInvoice(string search_query);
@@ -77,7 +77,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStoc
         Task<StockResponse> GetItemsbyBrandName(string BrandName);
         Task<StockResponse> SearchForInvoiceLines(string search_query);
         Task<StockResponse> UploadData([FromBody] List<uploadDatavm> data);
-        Task<StockResponse> UploadingData(IFormFile file);
+        Task<StockResponse> UploadingData(IFormFile file,string BatchNumber);
         Task<StockResponse> EditSerialNumber(EditSerialNumbervm editSerialNumbervm);
         Task<StockResponse> GetSerialNumberbyid(int itemID);
         Task<StockResponse> PostScannedData([FromBody] ScannedDataModel data);
@@ -94,7 +94,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStoc
         Task<StockResponse> GetAllPurchaseOrderDetails();
         Task<StockResponse> AdjustStock(AdjustStockvm adjustStockvm);
         Task<StockResponse> GetPOItemsByID(int ItemId);
-        Task<StockResponse> GetAdjustedStockById(int ItemID);
+        Task<StockResponse> GetAdjustedStockById(string batchNumber);
          Task<StockResponse> GetAllItemStock();
         Task<StockResponse> ApplyRequisition(AddRequisition addRequisition);
         Task<StockResponse> ApplyRequisitionForm(ApplyRequistionvm addRequisition);
@@ -108,5 +108,19 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStoc
          Task<StockResponse> SelectSerialNumber(SelectSerialvm selectSerialvm);
          Task<StockResponse> GetSelectedSerials(int issueID);
          Task<StockResponse> GetSerialByIssued();
+        Task<StockResponse> GetFormByStatusIssued();
+         Task<StockResponse> AddDeliveryNote(AddDeliveryNotevm addDeliveryNotevm);
+         Task<StockResponse> GetBatchByItems(int itemId);
+        Task<StockResponse> GetProductbyBatchid(string BatchNumber);
+         Task<StockResponse> StockAdjustment([FromBody] StockAdjustvm adjustStockvm);
+         Task<StockResponse> ApprovalsReview(ApproveBatchvm approvalProcessvm);
+        Task<StockResponse> GetBatchCompleteStatus();
+        Task<StockResponse> GetBatchByBatchNumber(string BatchNumber);
+         Task<StockResponse> AddPOItemLines(AddPOItemLinesvm addBatchDetailsvm);
+         Task<StockResponse> MarkPOComplete(string PONumber);
+         Task<StockResponse> POApprovalReview(POApprovalvm pOApprovalvm);
+        Task<StockResponse> GetPOByStatusPending();
+        Task<StockResponse> GetAllPOSWithStatusComplete();
+         Task<StockResponse> GetPONumberbyNumber(string POnumber);
     }
 }

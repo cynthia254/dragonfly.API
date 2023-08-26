@@ -46,6 +46,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUser
         Task<BaseResponse> DeleteDepartment(string DepartmentName);
         Task<BaseResponse> DeleteDesignation(string PositionName);
         Task<BaseResponse> SearchForUsers(string search_query);
+         Task<BaseResponse> MakeIssuer(string useremail);
+        Task<BaseResponse> MakeApprover(string useremail);
 
 
 

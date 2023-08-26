@@ -1602,7 +1602,97 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 return new BaseResponse("290", ex.Message, null);
             }
         }
-        
+        public async Task<BaseResponse> MakeIssuer(string useremail)
+        {
+            try
+            {
+
+                // get user
+
+                var userexsists = await _authDbContext.PayhouseDragonFlyUsers.Where(x => x.UserName == useremail).FirstOrDefaultAsync();
+                if (userexsists == null)
+                {
+
+                    return new BaseResponse("130", "userid does not exist", null);
+                }
+
+                userexsists.Issuer = true;
+                userexsists.StatusDescription = null;
+                userexsists.ReasonforStatus = "";
+                _authDbContext.Update(userexsists);
+                await _authDbContext.SaveChangesAsync();
+                var getuseronstatustable = await _authDbContext.UserStatusTable.Where(x => x.userId == userexsists.Id).FirstOrDefaultAsync();
+                if (getuseronstatustable == null)
+                {
+
+                    _logger.LogInformation("_________________________Nothing to remove from  user status table________________________|||___");
+                }
+                else
+                {
+                    _authDbContext.Remove(getuseronstatustable);
+                    await _authDbContext.SaveChangesAsync();
+                }
+
+
+
+
+
+                return new BaseResponse("200", $"Successfully made  user {userexsists.FirstName}  {userexsists.LastName} an issuer" , null);
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse("150", ex.Message, null);
+
+            }
+
+
+        }
+        public async Task<BaseResponse> MakeApprover(string useremail)
+        {
+            try
+            {
+
+                // get user
+
+                var userexsists = await _authDbContext.PayhouseDragonFlyUsers.Where(x => x.UserName == useremail).FirstOrDefaultAsync();
+                if (userexsists == null)
+                {
+
+                    return new BaseResponse("130", "userid does not exist", null);
+                }
+
+                userexsists.Checker = true;
+                userexsists.StatusDescription = null;
+                userexsists.ReasonforStatus = "";
+                _authDbContext.Update(userexsists);
+                await _authDbContext.SaveChangesAsync();
+                var getuseronstatustable = await _authDbContext.UserStatusTable.Where(x => x.userId == userexsists.Id).FirstOrDefaultAsync();
+                if (getuseronstatustable == null)
+                {
+
+                    _logger.LogInformation("_________________________Nothing to remove from  user status table________________________|||___");
+                }
+                else
+                {
+                    _authDbContext.Remove(getuseronstatustable);
+                    await _authDbContext.SaveChangesAsync();
+                }
+
+
+
+
+
+                return new BaseResponse("200", $"Successfully made user {userexsists.FirstName}  {userexsists.LastName} an approver", null);
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse("150", ex.Message, null);
+
+            }
+
+
+        }
+
     }
 
 

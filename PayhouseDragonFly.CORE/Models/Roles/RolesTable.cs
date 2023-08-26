@@ -12,5 +12,6 @@ namespace PayhouseDragonFly.CORE.Models.Roles
         [Key]
         public int RolesID { get; set; }
         public string RoleName { get; set; }
+
     }
 }

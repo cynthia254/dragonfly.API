@@ -18,6 +18,7 @@ namespace PayhouseDragonFly.CORE.DTOs.Stock
         public int invoiceItemId { get; set; }
         public string  reference_number { get; set; }
         public string ProductStatus { get; set; } = "INCOMPLETE";
+        public string BatchNumber { get; set;  }
 
     }
 }
