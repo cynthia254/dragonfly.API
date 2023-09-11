@@ -48,7 +48,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUser
         Task<BaseResponse> SearchForUsers(string search_query);
          Task<BaseResponse> MakeIssuer(string useremail);
         Task<BaseResponse> MakeApprover(string useremail);
-
+        Task<BaseResponse> RemoveApprover(string userMail);
 
 
     }

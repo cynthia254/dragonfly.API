@@ -33,5 +33,8 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public string RejectedReason { get; set; }="Unknown";
         public string ApprovedBy { get; set; } = "Unknown";
         public int TotalClosed { get; set; }
+        public string ItemName { get; set; }
+        public string BrandName { get; set; }
+        public int totalDeliveredForAllItems { get; set; }
     }
 }

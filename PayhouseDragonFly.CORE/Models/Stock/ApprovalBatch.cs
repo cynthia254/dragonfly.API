@@ -17,5 +17,9 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public string RejectedReason { get; set; }
         public string BatchNumber { get; set; }
         public int TotalClosed { get; set; }
+        public string BrandName { get; set; }
+        public string ItemName { get; set; }
+        public DateTime DateApproved { get; set; }=DateTime.Now;
+        public int TotalAvalialbeStock { get; set; }
     }
 }

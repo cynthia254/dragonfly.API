@@ -77,7 +77,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStoc
         Task<StockResponse> GetItemsbyBrandName(string BrandName);
         Task<StockResponse> SearchForInvoiceLines(string search_query);
         Task<StockResponse> UploadData([FromBody] List<uploadDatavm> data);
-        Task<StockResponse> UploadingData(IFormFile file,string BatchNumber);
+        Task<StockResponse> UploadingData(IFormFile file,string BatchNumber, int batchID);
         Task<StockResponse> EditSerialNumber(EditSerialNumbervm editSerialNumbervm);
         Task<StockResponse> GetSerialNumberbyid(int itemID);
         Task<StockResponse> PostScannedData([FromBody] ScannedDataModel data);
@@ -122,5 +122,15 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStoc
         Task<StockResponse> GetPOByStatusPending();
         Task<StockResponse> GetAllPOSWithStatusComplete();
          Task<StockResponse> GetPONumberbyNumber(string POnumber);
+        Task<StockResponse> MarkBatchCompplete(string BatchNumber);
+        Task<StockResponse> MarkPOLinesAsComplete(string PONumber);
+         Task<StockResponse> GetAllPOSWithStatusPending();
+         Task<StockResponse> PODeliveryReview(ApprovalPODeliveryvm pOApprovalvm);
+         Task<StockResponse> GetItemByClient(string ClientName);
+        Task<StockResponse> SearchForPO(string search_query);
+         Task<StockResponse> GetPOLinesNByID(int itemId);
+       Task<StockResponse> GetProductDetailsByBatchNumber(string BatchNumber);
+        Task<StockResponse> GetBatchByPONumber(string poNumber);
+        Task<StockResponse> GetAllItemsReorder();
     }
 }

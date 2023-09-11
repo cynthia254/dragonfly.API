@@ -58,29 +58,19 @@ namespace PayhouseDragonFly.API.Controllers.User
         public async Task<RegisterResponse> RegisterUser(RegisterVms rv)
         {
             var roleclaimname = "CanCreateUsers";
-            var loggedinuser = await _loggeinuser.LoggedInUser();
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
-                if (roleclaimtrue)
-                {
-                    return await _userServices.RegisterUser(rv);
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new RegisterResponse("110", "You have no permission access this", null);
 
-                }
+                return await _userServices.RegisterUser(rv);
+
             }
             else
             {
-
-                return new RegisterResponse("130", "You have no permission to access this", null);
+                return new RegisterResponse("190", "You have no permission to access this", null);
             }
-
-            return new RegisterResponse("", "", null);
 
 
         }
@@ -92,29 +82,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanViewAllUsers";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-
-
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.GetAllUsers();
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
+                return await _userServices.GetAllUsers();
 
-                }
             }
             else
             {
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
 
         }
 
@@ -126,28 +105,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanDeleteUser";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.DeleteUser(usermail);
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
+                return await _userServices.DeleteUser(usermail);
 
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
         }
 
 
@@ -160,28 +129,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanConfirmUser";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.ConfirmUserAccount(useremail);
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
+                return await _userServices.ConfirmUserAccount(useremail);
 
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
         }
 
 
@@ -217,28 +176,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanAddDepartment";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.AddDepartment(addDepartmentvms);
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
+                return await _userServices.AddDepartment(addDepartmentvms);
 
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
@@ -248,28 +197,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanViewDepartments";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.GetAllDepartment();
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
+                return await _userServices.GetAllDepartment();
 
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
         }
 
 
@@ -287,29 +226,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanSeeRelatedDepartment";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-               .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.GetDepartmentByID(departmentid);
+                return await _userServices.GetDepartmentByID(departmentid);
 
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
-
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
         }
     
 
@@ -321,28 +249,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanSuspendUser";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId >0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.SuspendUser(vm);
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
+                return await _userServices.SuspendUser(vm);
 
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
 
         }   
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -352,28 +270,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanEditUserStatus";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId>0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.ChangeUserStatus(vm);
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
+                return await _userServices.ChangeUserStatus(vm);
 
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
@@ -410,29 +318,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanActivateUser";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId >0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.ActivateUser(useremail);
+                return await _userServices.ActivateUser(useremail);
 
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
-
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
 
         }
 
@@ -443,28 +340,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanCreateDesignation";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId >0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.AddDesignation(addDesignationvms);
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
+                return await _userServices.AddDesignation(addDesignationvms);
 
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
@@ -473,28 +360,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanViewDesignations";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId >0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.GetAllDesignation();
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
+                return await _userServices.GetAllDesignation();
 
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -512,26 +389,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanEditDesignation";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.EditDesignation(editDesignationvm);
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
-                }
+                return await _userServices.EditDesignation(editDesignationvm);
+
             }
             else
             {
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
 
         }
 
@@ -564,26 +433,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanEditDepartment";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.EditDepartment(editDepartmentvms);
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
-                }
+                return await _userServices.EditDepartment(editDepartmentvms);
+
             }
             else
             {
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
 
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -615,29 +476,18 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanMakeIssuer";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.MakeIssuer(useremail);
+                return await _userServices.MakeIssuer(useremail);
 
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
-
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
 
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -647,35 +497,30 @@ namespace PayhouseDragonFly.API.Controllers.User
         {
             var roleclaimname = "CanMakeApprover";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleservices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _userServices.MakeApprover(useremail);
+                return await _userServices.MakeApprover(useremail);
 
-                }
-                else if (!roleclaimtrue)
-                {
-                    return new BaseResponse("110", "You have no permission access this", null);
-
-                }
             }
             else
             {
-
-                return new BaseResponse("120", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("", "", null);
+
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("RemoveApprover")]
+        public async Task<BaseResponse> RemoveApprover(string userMail)
+        {
+            return await _userServices.RemoveApprover(userMail);
 
         }
 
-
-
-    }
+        }
 
 
 

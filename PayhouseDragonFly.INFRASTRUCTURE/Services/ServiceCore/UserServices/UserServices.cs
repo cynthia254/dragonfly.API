@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DocumentFormat.OpenXml.InkML;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -167,6 +168,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                         DepartmentDescription = "Any Description",
                         PostionDescription = "Any Description",
                         PositionName = "Any name",
+                        
                     };
 
                     var response = await _userManager.CreateAsync(newuser, rv.Password);
@@ -391,7 +393,8 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                             StatusDescription = user.StatusDescription,
                             ReasonforStatus = user.ReasonforStatus,
                             PositionName = user.PositionName,
-                            PositionDescription = user.PostionDescription
+                            PositionDescription = user.PostionDescription,
+                            Checker=user.Checker,
 
 
 
@@ -1682,7 +1685,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
 
 
-                return new BaseResponse("200", $"Successfully made user {userexsists.FirstName}  {userexsists.LastName} an approver", null);
+                return new BaseResponse("200", $"Successfully made selected users approvers", useremail);
             }
             catch (Exception ex)
             {
@@ -1692,6 +1695,38 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
 
         }
+        public async Task<BaseResponse> RemoveApprover(string userMail)
+        {
+            try
+            {
+                var userExists = await _userManager.FindByEmailAsync(userMail);
+
+                if (userExists == null)
+                {
+                    return new BaseResponse("190", "User not found", null);
+                }
+
+                // Assuming you have a DbSet for PayhouseDragonFlyUsers in your DbContext
+                var user = await _authDbContext.PayhouseDragonFlyUsers
+                    .Where(u => u.Email == userMail && u.Checker == true)
+                    .FirstOrDefaultAsync();
+
+                if (user == null)
+                {
+                    return new BaseResponse("150", "User is not an approver", null);
+                }
+
+                user.Checker = false; // Set the Checker property to false to remove as approver
+                await _authDbContext.SaveChangesAsync();
+
+                return new BaseResponse("200", "User removed as an approver successfully", null);
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse("190", ex.Message, null);
+            }
+        }
+
 
     }
 

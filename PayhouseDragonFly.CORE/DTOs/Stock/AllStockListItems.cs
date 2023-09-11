@@ -32,6 +32,9 @@ namespace PayhouseDragonFly.CORE.DTOs.Stock
         public int TotalReturnedStock { get; set; }
         public int StockIn { get; set; }
         public string UpdatedBy { get; set; }
-       
+        public int totalDeliveredForAllItems { get; set; }
+        public int TotalQuantityDamaged { get; set; }
+        public int TotalAvailableStock { get; set; }
+
     }
 }

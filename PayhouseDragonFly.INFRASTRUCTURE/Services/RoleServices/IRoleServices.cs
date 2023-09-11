@@ -20,12 +20,14 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
         Task<bool> CheckClaimInRole(String claimname, int roleid);
         Task<BaseResponse> DeleteRoleClaim(int ClaimId, int roleid);
          Task<BaseResponse> GetUserOtherRoles(string userid);
-        Task<BaseResponse> AssignUserOtherRoles(otherRolesvm vm);
+         Task<BaseResponse> AssignUserOtherRoles(string userId, List<int> roleIds);
         Task<BaseResponse> DeleteRole(string RoleName);
         Task<BaseResponse> DeleteResponsibility(int ClaimId);
         Task<BaseResponse> GetUserRoles(string userid);
         Task<Rolesresponse> GetRoleByUserId(string userid);
         Task<Roles_User_CounterResponse> UsersWithRole(int roleid);
+       Task<BaseResponse> CheckAndGrantPermissions(string userId, List<string> requiredClaimNames);
+       Task<bool> MasterRoleChecker(string userid, string claimrole);
 
        }
         }

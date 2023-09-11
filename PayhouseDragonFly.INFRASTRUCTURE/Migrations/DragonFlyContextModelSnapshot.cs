@@ -346,6 +346,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.Property<int>("BatchQuantity")
                         .HasColumnType("int");
 
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CategoryName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -362,6 +366,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
 
                     b.Property<int>("ItemID")
                         .HasColumnType("int");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MeansOfDelivery")
                         .IsRequired()
@@ -401,6 +409,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.Property<string>("selectedOption")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("totalDeliveredForAllItems")
+                        .HasColumnType("int");
 
                     b.HasKey("DeliveryId");
 
@@ -505,6 +516,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.Property<string>("ProductStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
                     b.Property<string>("SerialNumber")
                         .IsRequired()
@@ -938,12 +952,26 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("ClosedQuantity")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("DateApproved")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RejectedReason")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalAvalialbeStock")
+                        .HasColumnType("int");
 
                     b.Property<int>("TotalClosed")
                         .HasColumnType("int");
@@ -958,6 +986,42 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("ApprovalBatch");
+                });
+
+            modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.ApprovalPODelivery", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<string>("ApprovalStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ApprovedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("AprrovedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PONumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RejectedReason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("selectedOption")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("ApprovalPODelivery");
                 });
 
             modelBuilder.Entity("PayhouseDragonFly.CORE.Models.Stock.BatchNo", b =>
@@ -1175,7 +1239,15 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IssueId"));
 
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1199,6 +1271,14 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("Requisitiioner")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StockNeed")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IssueId");
 
@@ -1420,14 +1500,67 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Comments")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateIssued")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IMEI2")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IMEII1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("IssueID")
                         .HasColumnType("int");
+
+                    b.Property<string>("IssueStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IssuedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("IssuedIID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Requisitioner")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SerialNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SerialStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StockNeed")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("clientName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1474,6 +1607,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("TotalDamaged")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalQuantityDamaged")
                         .HasColumnType("int");
 
                     b.HasKey("Adjustedid");
@@ -1608,6 +1744,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
                     b.Property<int>("TotalClosed")
                         .HasColumnType("int");
 
+                    b.Property<int>("TotalDamages")
+                        .HasColumnType("int");
+
                     b.Property<int>("TotalDelivered")
                         .HasColumnType("int");
 
@@ -1635,6 +1774,9 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Migrations
 
                     b.Property<DateTime>("WarrantyStartDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("totalDeliveredForAllItems")
+                        .HasColumnType("int");
 
                     b.HasKey("ID");
 

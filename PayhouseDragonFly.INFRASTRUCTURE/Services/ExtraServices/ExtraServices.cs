@@ -33,7 +33,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ExtraServices
 
                 var loggedinuser = await _context.PayhouseDragonFlyUsers.Where(x => x.Id == currentuserid).FirstOrDefaultAsync();
 
-                return   loggedinuser;
+                return loggedinuser;
             }
             catch (Exception ex)
             {

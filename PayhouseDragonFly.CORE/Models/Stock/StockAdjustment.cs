@@ -20,5 +20,6 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public string CategoryName { get; set; }
         public int TotalDamaged { get; set; }
         public DateTime DateCreated { get; set; }= DateTime.Now;
+        public int TotalQuantityDamaged { get; set;  }
     }
 }

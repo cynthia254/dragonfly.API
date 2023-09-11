@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.BseResponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.roleresponse;
 using PayhouseDragonFly.CORE.ConnectorClasses.Response.RolesResponse;
+using PayhouseDragonFly.CORE.ConnectorClasses.Response.StockResponse;
 using PayhouseDragonFly.CORE.DTOs.loginvms;
 using PayhouseDragonFly.CORE.DTOs.Roles;
+using PayhouseDragonFly.CORE.DTOs.Stock;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices;
 
@@ -33,22 +35,19 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         {
             var roleclaimname = "CanCreateRole";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleServices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleServices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _roleServices.CreateRole(Rolename);
-                }
+                return await _roleServices.CreateRole(Rolename);
+
             }
             else
             {
-                return new RolesResponse(false, "You have no permission access this", null);
+                return new RolesResponse(false, "You have no permission to access this", null);
             }
-            return new RolesResponse(false, "", null);
+
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -58,24 +57,18 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         {
             var roleclaimname = "CanViewAllRoles";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleServices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleServices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (    loggedinuser.RoleId==1 || loggedinuser.RoleId==2 )
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _roleServices.GetAllRoles();
+                return await _roleServices.GetAllRoles();
 
-                }
             }
             else
             {
-
-                return new RolesResponse(false, "You have no permission access this", null);
+                return new RolesResponse(false, "You have no permission to access this", null);
             }
-            return new RolesResponse(false, "", null);
         }
 
 
@@ -97,23 +90,18 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         {
             var roleclaimnamename = "CanAddRoleClaim";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleServices
-                .CheckClaimInRole(roleclaimnamename, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleServices.MasterRoleChecker(loggedinuser.Id, roleclaimnamename);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _roleServices.AddRoleClaim(roleclaimname);
-                }
+                return await _roleServices.AddRoleClaim(roleclaimname);
+
             }
             else
             {
-
-                return new Rolesresponse(false, "You have no permission access this", null);
+                return new Rolesresponse(false, "You have no permission to access this", null);
             }
-            return new Rolesresponse(false, "", null);
 
         }
 
@@ -126,23 +114,18 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         {
             var roleclaimname = "CanViewRoleClaims";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleServices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleServices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _roleServices.GetAllRolecLaims();
-                }
+                return await _roleServices.GetAllRolecLaims();
+
             }
             else
             {
-
-                return new Rolesresponse(false, "You have no permission access this", null);
+                return new Rolesresponse(false, "You have no permission to access this", null);
             }
-            return new Rolesresponse(false, "", null);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -152,23 +135,18 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         {
             var roleclaimname = "CanAddClaimsToRoles";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleServices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleServices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _roleServices.AddClaimsToRole(roleid, claimid);
-                }
+                return await _roleServices.AddClaimsToRole(roleid,claimid);
+
             }
             else
             {
-
-                return new Rolesresponse(false, "You have no permission access this", null);
+                return new Rolesresponse(false, "You have no permission to access this", null);
             }
-            return new Rolesresponse(false, "", null);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -178,23 +156,18 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         {
             var roleclaimname = "CanViewRoleClaims";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleServices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleServices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _roleServices.GetRoleClaims(roleid);
-                }
+                return await _roleServices.GetRoleClaims(roleid);
+
             }
             else
             {
-
-                return new RoleClaimsResponse(false, "You have no permission access this", "", null);
+               return new RoleClaimsResponse(false,"You have no permission to access this","",null);
             }
-            return new RoleClaimsResponse(false, "", "", null);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -204,23 +177,18 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         {
             var roleclaimname = "CanViewRoleClaims";
             var loggedinuser = _loggeinuser.LoggedInUser().Result;
-            var roleclaimtrue = await _roleServices
-                .CheckClaimInRole(roleclaimname, loggedinuser.RoleId);
+            var master_rolechecker_response = await _roleServices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
 
-            if (loggedinuser.RoleId > 0)
+            if (master_rolechecker_response)
             {
 
-                if (roleclaimtrue)
-                {
-                    return await _roleServices.GetRoleByID(Roleid);
-                }
+                return await _roleServices.GetRoleByID(Roleid);
+
             }
             else
             {
-
-                return new BaseResponse("130", "You have no permission access this", null);
+                return new BaseResponse("190", "You have no permission to access this", null);
             }
-            return new BaseResponse("140", "", null);
 
 
         }
@@ -235,9 +203,9 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AssignUserOtherRoles")]
-        public async Task<BaseResponse> AssignUserOtherRoles(otherRolesvm vm)
+        public async Task<BaseResponse> AssignUserOtherRoles(string userId, List<int> roleIds)
         {
-            return await _roleServices.AssignUserOtherRoles(vm);
+            return await _roleServices.AssignUserOtherRoles(userId,roleIds);
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
 
@@ -284,6 +252,51 @@ namespace PayhouseDragonFly.API.Controllers.Roles
         {
             return await _roleServices.UsersWithRole(roleid);
         }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("CheckAndGrantPermissions")]
+        public async Task<BaseResponse> CheckAndGrantPermissions(string userId, List<string> requiredClaimNames)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return new BaseResponse("140", "User ID is required", null);
+                }
+
+                // Call the service method to update user claims based on roles
+                var updateResponse = await _roleServices.CheckAndGrantPermissions(userId,requiredClaimNames);
+
+                if (updateResponse.Code == "200")
+                {
+                    // Check if the user has the required claims
+                    var userClaims = HttpContext.User.Claims
+                        .Where(c => requiredClaimNames.Contains(c.Type))
+                        .Select(c => c.Type)
+                        .ToList();
+
+                    if (userClaims.Count == requiredClaimNames.Count)
+                    {
+                        return new BaseResponse("200", "User permissions updated based on assigned roles and required claims", null);
+                    }
+                    else
+                    {
+                        return new BaseResponse("200", "User permissions updated based on assigned roles, but missing some required claims", null);
+                    }
+                }
+                else
+                {
+                    return new BaseResponse("190", "Failed to update user permissions", null);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse("190", ex.Message, null);
+            }
+        }
+
+
+
 
 
 

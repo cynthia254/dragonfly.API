@@ -9,7 +9,7 @@ namespace PayhouseDragonFly.CORE.Models.Roles
     public class OtherRoles
     {
         public int otherRolesID { get; set; }
-        public int RoleID { get; set; }
-        public string userID { get; set; }
+        public int RoleID { get; set; } = 0;
+        public string userID { get; set; } = "Unknown";
     }
 }

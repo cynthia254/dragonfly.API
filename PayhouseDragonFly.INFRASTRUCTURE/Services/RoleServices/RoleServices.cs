@@ -10,6 +10,7 @@ using PayhouseDragonFly.CORE.Models.Roles;
 using PayhouseDragonFly.CORE.Models.UserRegistration;
 using PayhouseDragonFly.INFRASTRUCTURE.DataContext;
 using PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IExtraServices;
+using System.Data;
 
 namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
 {
@@ -146,14 +147,14 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
 
                     //check user already has role
 
-                        userexists.RoleId = roleexists.RolesID;
-                        scopedcontext.Update(userexists);
-                        await scopedcontext.SaveChangesAsync();
-                    return new RolesResponse(true,"Role Assigned successfully", null);
+                    userexists.RoleId = roleexists.RolesID;
+                    scopedcontext.Update(userexists);
+                    await scopedcontext.SaveChangesAsync();
+                    return new RolesResponse(true, "Role Assigned successfully", null);
 
                 }
-               
-                
+
+
             }
             catch (Exception ex)
             {
@@ -161,6 +162,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
 
             }
         }
+
 
         public async Task<RolesResponse> GetAllRoles()
         {
@@ -506,72 +508,72 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
         }
 
         //add user other roles
-        public async Task<BaseResponse> AssignUserOtherRoles(otherRolesvm vm)
+        public async Task<BaseResponse> AssignUserOtherRoles(string userId, List<int> roleIds)
         {
-
             try
             {
                 using (var scope = _scopeFactory.CreateScope())
                 {
                     var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
-                    if (vm.userID == null)
-                    {
 
-                        return new BaseResponse("180", "user id cannot be null", null);
-                    }
-                    if (vm.RoleID <= 0)
-                    {
-                        return new BaseResponse("140", "role id cannot be null", null);
-
-                    }
-                    //check user exists
-
-                    var userexists = await scopedcontext.PayhouseDragonFlyUsers.Where(p => p.Id == vm.userID).FirstOrDefaultAsync();
+                    // Check if user exists
+                    var userexists = await scopedcontext.PayhouseDragonFlyUsers.FirstOrDefaultAsync(p => p.Id == userId);
 
                     if (userexists == null)
                     {
-                        return new BaseResponse("140", "user does not exist", null);
-                    }
-                    //
-
-                    var rolealreadyadded= await scopedcontext.OtherRoles.Where(y=>y.RoleID == vm.RoleID  && y.userID==vm.userID ).FirstOrDefaultAsync();
-
-
-                    if (rolealreadyadded != null)
-                    {
-                        return new BaseResponse("20", "Role already exists", null);
-
+                        return new BaseResponse("140", $"User with ID {userId} does not exist", null);
                     }
 
-                    //role exists
-                    var roleexists = await scopedcontext.RolesTable.Where(p => p.RolesID == vm.RoleID).FirstOrDefaultAsync();
+                    var addedRolesCount = 0;
 
-                    if (roleexists == null)
+
+                    foreach (var roleId in roleIds)
                     {
-                        return new BaseResponse("130", "role does not exist", null);
+                        if (roleId <= 0)
+                        {
+                            continue;
+                        }
+
+                        // Check if role exists
+                        var roleexists = await scopedcontext.RolesTable.FirstOrDefaultAsync(p => p.RolesID == roleId);
+
+                        if (roleexists == null)
+                        {
+                            continue;
+                        }
+
+                        // Check if role is already assigned to the user
+                        var roleAlreadyAdded = await scopedcontext.OtherRoles
+                            .FirstOrDefaultAsync(y => y.RoleID == roleId && y.userID == userId);
+
+                        if (roleAlreadyAdded != null)
+                        {
+                            continue;
+                        }
+
+                        // Add role to the user
+                        var otherRoleAdded = new OtherRoles
+                        {
+                            userID = userId,
+                            RoleID = roleId,
+                        };
+                        await scopedcontext.AddAsync(otherRoleAdded);
+                        await scopedcontext.SaveChangesAsync();
+
+                        addedRolesCount++;
                     }
 
-
-                    //addin role 
-
-                    var otherroleadded = new OtherRoles
-                    {
-                        userID = vm.userID,
-                        RoleID = vm.RoleID,
-                    };
-                    await scopedcontext.AddAsync(otherroleadded);
-                    await scopedcontext.SaveChangesAsync();
-                    return new BaseResponse("200", "user role added successfully", null);
-
-                }
-
+                        return new BaseResponse("200", "Roles Added Successfully", null);
+                    }
+                
             }
             catch (Exception ex)
             {
                 return new BaseResponse("190", ex.Message, null);
-
             }
         }
+
+     
 
         //get user other roles 
 
@@ -767,6 +769,110 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.RoleServices
             
             }
         }
+        public async Task<BaseResponse> CheckAndGrantPermissions(string userId, List<string> requiredClaimNames)
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    // Check if the user exists
+                    var userExists = await scopedcontext.PayhouseDragonFlyUsers
+                        .AnyAsync(u => u.Id == userId);
+
+                    if (!userExists)
+                    {
+                        return new BaseResponse("140", $"User with ID {userId} does not exist", null);
+                    }
+
+                    // Get the role IDs assigned to the user in the "OtherRoles" table
+                    var assignedRoleIds = await scopedcontext.OtherRoles
+                        .Where(or => or.userID == userId)
+                        .Select(or => or.RoleID)
+                        .ToListAsync();
+
+                    // Check if the user's assigned roles grant any of the required claims
+                    var permissionsGranted = false;
+                    foreach (var roleId in assignedRoleIds)
+                    {
+                        var hasPermission = await scopedcontext.Claim_Role_Map
+              .AnyAsync(crm => crm.RoleId == roleId && requiredClaimNames.Contains(crm.ClaimId.ToString()));
+
+
+                        if (hasPermission)
+                        {
+                            permissionsGranted = true;
+                            break; // If any role grants permission, no need to continue checking
+                        }
+                    }
+
+                    if (permissionsGranted)
+                    {
+                        return new BaseResponse("200", $"User with ID {userId} is granted permission for the specified claims", null);
+                    }
+                    else
+                    {
+                        return new BaseResponse("140", $"User with ID {userId} is not granted permission for the specified claims", null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse("190", ex.Message, null);
+            }
+
+        }
+
+
+        public async Task<bool> MasterRoleChecker(string userid, string claimrole)
+        {
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedcontext = scope.ServiceProvider.GetRequiredService<DragonFlyContext>();
+
+                    // All user role lists
+                    var all_user_roles = await scopedcontext.OtherRoles.Where(y => y.userID == userid).ToListAsync();
+                    if (all_user_roles == null)
+                    {
+                        return false;
+                    }
+
+                    var claimexists = await scopedcontext.RoleClaimsTable.Where(y => y.ClaimName == claimrole).FirstOrDefaultAsync();
+                    if (claimexists == null)
+                    {
+                        return false;
+                    }
+
+                    // Claim role exists 
+                    foreach (var eachrole in all_user_roles)
+                    {
+                        var claimmapped = await scopedcontext
+                            .Claim_Role_Map.Where(y => y.RoleId == eachrole.RoleID && y.ClaimId == claimexists.RolesClaimsTableId).FirstOrDefaultAsync();
+
+                        if (claimmapped == null)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
+
+                    // If we reach this point, no matching claim mappings were found
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($"method error :{ex.Message}");
+                return false;
+            }
+        }
+
 
 
     }
