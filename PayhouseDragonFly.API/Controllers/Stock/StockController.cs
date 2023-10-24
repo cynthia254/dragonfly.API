@@ -68,21 +68,77 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         [Route("GetAllBrands")]
         public async Task<StockResponse> GetAllBrand()
         {
-            return await _stockServices.GetAllBrand();
+            var roleclaimname = "CanViewBrands";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
+
+            if (master_rolechecker_response)
+            {
+
+                return await _stockServices.GetAllBrand();
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddItem")]
         public async Task<StockResponse> AddItem(AddItemvm addItemvm)
         {
-            return await _stockServices.AddItem(addItemvm);
+            var roleclaimname = "CanAddItem";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
+
+            if (master_rolechecker_response)
+            {
+
+                return await _stockServices.AddItem(addItemvm);
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetSerialByOrderNo")]
+        public async Task<StockResponse> GetSerialNumberByIssueId(int issueid)
+        {
+            return await _stockServices.GetSerialNumberByIssueId(issueid);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetSerialByItemID")]
+        public async Task<StockResponse> GetSerialByItemId(int ItemId)
+        {
+            return await _stockServices.GetSerialByItemId(ItemId);
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("GetAllItems")]
         public async Task<StockResponse> GetAllItems()
         {
-            return await _stockServices.GetAllItems();
+            var roleclaimname = "CanViewAllItems";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
+
+            if (master_rolechecker_response)
+            {
+
+                return await _stockServices.GetAllItems();
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
 
         }
 
@@ -95,10 +151,32 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
+        [Route("GetIssuedItem")]
+        public async Task<StockResponse> GetNameToUse()
+        {
+            return await _stockServices.GetNameToUse();
+
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
         [Route("AddCustomer")]
         public async Task<StockResponse> AddCustomer(AddCustomervm addCustomervm)
         {
-            return await _stockServices.AddCustomer(addCustomervm);
+            var roleclaimname = "CanAddCustomer";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
+
+            if (master_rolechecker_response)
+            {
+
+                return await _stockServices.AddCustomer(addCustomervm);
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
 
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -106,7 +184,21 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         [Route("GetAllCustomers")]
         public async Task<StockResponse> GetAllCustomers()
         {
-            return await _stockServices.GetAllCustomers();
+            var roleclaimname = "CanViewCustomers";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
+
+            if (master_rolechecker_response)
+            {
+
+                return await _stockServices.GetAllCustomers();
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
 
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -122,7 +214,21 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         [Route("AddSupplier")]
         public async Task<StockResponse> AddSupplier(AddSupplierVm addSupplierVm)
         {
-            return await _stockServices.AddSupplier(addSupplierVm);
+            var roleclaimname = "CanAddSupplier";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
+
+            if (master_rolechecker_response)
+            {
+
+                return await _stockServices.AddSupplier(addSupplierVm);
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
 
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -130,7 +236,21 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         [Route("GetAllSuppliers")]
         public async Task<StockResponse> GetAllSuppliers()
         {
-            return await _stockServices.GetAllSuppliers();
+            var roleclaimname = "CanViewSuppliers";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
+
+            if (master_rolechecker_response)
+            {
+
+                return await _stockServices.GetAllSuppliers();
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
 
         }
         [HttpPost]
@@ -184,6 +304,19 @@ namespace PayhouseDragonFly.API.Controllers.Stock
             return await _stockServices.GetItemById(itemid);
         }
         [HttpPost]
+        [Route("GetSerialById")]
+        public async Task<StockResponse> GetSelectedSerialsByID(int ID)
+        {
+            return await _stockServices.GetSelectedSerialsByID(ID);
+        }
+
+        [HttpPost]
+        [Route("GetIssueByID")]
+        public async Task<StockResponse> GetFormIssuedByID(int Issueid)
+        {
+            return await _stockServices.GetFormIssuedByID(Issueid);
+        }
+        [HttpPost]
         [Route("GetPurchaseById")]
         public async Task<StockResponse> GetPurchaseById(int purchaseId)
         {
@@ -216,12 +349,31 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         {
             return await _stockServices.AddReturnedStatus(addReturnedStatusvm);
         }
+        [HttpPost]
+        [Route("GetSelectedSerialIssue")]
+        public async Task<StockResponse> GetSelectedSerialsToIssueByID(int ID)
+        {
+            return await _stockServices.GetSelectedSerialsToIssueByID(ID);
+        }
+        [HttpPost]
+        [Route("GetSelectedSerialByNo")]
+        public async Task<StockResponse> GetSelectedSerialsByIssueNo(int issuedNo)
+        {
+            return await _stockServices.GetSelectedSerialsByIssueNo(issuedNo);
+        }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("GetAllReturnedStatus")]
         public async Task<StockResponse> GetAllReturnedStatus()
         {
             return await _stockServices.GetAllReturnedStatus();
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("SelectSerialNumberToissue")]
+        public async Task<StockResponse> SelectSerialNumber(SelectedSerialvm addBrandvm)
+        {
+            return await _stockServices.SelectSerialNumber(addBrandvm);
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
@@ -236,6 +388,20 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         public async Task<StockResponse> GetAllReturnedStock()
         {
             return await _stockServices.GetAllReturnedStock();
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetRequisitionbyClientName")]
+        public async Task<StockResponse> GetAllRequisitionApplicationbyClientName(string clientName)
+        {
+            return await _stockServices.GetAllRequisitionApplicationbyClientName(clientName);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetCustomerByName")]
+        public async Task<StockResponse> GetCustomerByName(string clientName)
+        {
+            return await _stockServices.GetCustomerByName(clientName);
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
@@ -286,6 +452,13 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         {
             return await _stockServices.DeleteStockOut(salesId);
         }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetReturnedStockByIssuedId")]
+        public async Task<StockResponse> GetReturnedDataById(int Id)
+        {
+            return await _stockServices.GetReturnedDataById(Id);
+        }
 
         [HttpPost]
         [Route("EditStockOut")]
@@ -319,7 +492,21 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         [Route("EditSupplier")]
         public async Task<StockResponse> EditSupplier(editSuppliervm suppliervm)
         {
-            return await _stockServices.EditSupplier(suppliervm);
+            var roleclaimname = "CanEditSupplier";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
+
+            if (master_rolechecker_response)
+            {
+
+                return await _stockServices.EditSupplier(suppliervm);
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
@@ -512,6 +699,13 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
+        [Route("GetSerialNumberByBatch")]
+        public async Task<StockResponse> GetSerialNumberByBatch(string BatchNumber)
+        {
+            return await _stockServices.GetSerialNumberByBatch(BatchNumber);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
         [Route("GetProductNumbering")]
         public async Task<StockResponse> GetProduct_Numbers_ByReference(string reference)
         {
@@ -607,7 +801,21 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         [Route("GetAllPOS")]
         public async Task<StockResponse> GetAllPOs()
         {
-            return await _stockServices.GetAllPOs();
+            var roleclaimname = "CanViewAllPOS";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
+
+            if (master_rolechecker_response)
+            {
+
+                return await _stockServices.GetAllPOs();
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
@@ -686,6 +894,20 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         public async Task<StockResponse> MarkPOLinesAsComplete(string PONumber)
         {
             return await _stockServices.MarkPOLinesAsComplete(PONumber);
+            
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetSerialByItemName")]
+        public async Task<StockResponse> GetSerialByItemName(string brandName, string itemName)
+        {
+            return await _stockServices.GetSerialByItemName(brandName,itemName);
+        }
+        [HttpPost]
+        [Route("GettingSerialUnderItem")]
+        public async Task<StockResponse> GetItemByPONumber(string PONumber)
+        {
+            return await _stockServices.GetItemByPONumber(PONumber);
 
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -693,7 +915,21 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         [Route("GetAllPurchaseOrderss")]
         public async Task<StockResponse> GetAllPurchaseOrderDetails()
         {
-            return await _stockServices.GetAllPurchaseOrderDetails();
+            var roleclaimname = "CanViewAllPOS";
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+            var master_rolechecker_response = await _roleservices.MasterRoleChecker(loggedinuser.Id, roleclaimname);
+            
+            if (master_rolechecker_response)
+            {
+
+                return await _stockServices.GetAllPurchaseOrderDetails();
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
@@ -718,6 +954,34 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         {
             return await _stockServices.GetAdjustedStockById(batchNumber);
 
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetAllMonthlyRecord")]
+        public async Task<StockResponse> GetMonthlyRecord(int Year)
+        {
+            return await _stockServices.GetMonthlyRecord(Year);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetDeliveredItemPerMonth")]
+        public async Task<List<AddDeliveryNote>> GetDeliveredItemsByMonthAndYear(int year, int month)
+        {
+            return await _stockServices.GetDeliveredItemsByMonthAndYear(year,month);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetDamagedItemsPerMonth")]
+        public async Task<List<StockAdjustment>> GetDamagedItemsByMonthAndYear(int year, int month)
+        {
+            return await _stockServices.GetDamagedItemsByMonthAndYear(year, month);
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetIssuedItemPerMonth")]
+        public async Task<List<SelectSerial>> GetIssuedItemsByMonthandYear(int year, int month)
+        {
+            return await _stockServices.GetIssuedItemsByMonthandYear(year, month);
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
@@ -745,7 +1009,27 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         [Route("ApplicationStatus")]
         public async Task<StockResponse> ApplicationStatus(ApprovalProcessvm approvalProcessvm)
         {
-            return await _stockServices.ApplicationStatus(approvalProcessvm);
+            var loggedinuser = _loggeinuser.LoggedInUser().Result;
+
+            if (loggedinuser.Checker==true)
+            {
+
+
+                return await _stockServices.ApplicationStatus(approvalProcessvm);
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("ApprovalReturn")]
+        public async Task<StockResponse> ReturnReview(ApprovalReturnedStockvm approvalProcessvm)
+        {
+            return await _stockServices.ReturnReview(approvalProcessvm);
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
@@ -812,13 +1096,32 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
+        [Route("GetAllItemsToBeReturned")]
+        public async Task<StockResponse> GetAllItemToBeReturned()
+        {
+            var loggedinuser = await _loggeinuser.LoggedInUser();
+
+            if (loggedinuser.Checker == true)
+            {
+
+                return await _stockServices.GetAllItemToBeReturned();
+
+            }
+            else
+            {
+                return new StockResponse(false, "You have no permission to access this", null);
+            }
+
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet]
         [Route("GetFormStatusWithApproved")]
 
         public async Task<StockResponse> GetFormStatusApproved()
         {
             var loggedinuser = await _loggeinuser.LoggedInUser();
 
-            if (loggedinuser.Checker == true)
+            if (loggedinuser.Issuer == true)
             {
 
                 return await _stockServices.GetFormStatusApproved();
@@ -837,6 +1140,16 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         {
             return await _stockServices.SelectSerialNumber(selectSerialvm);
         }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetSerialByBrandAndItem")]
+        public async Task<StockResponse> GetSerialByBrandAndItem(string brandName, string itemName)
+        {
+            return await _stockServices.GetSerialByBrandAndItem(brandName,itemName);
+        }
+
+
+
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("GetSelectedByIssueID")]
@@ -922,6 +1235,7 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         [Route("ApproversReview")]
         public async Task<StockResponse> ApprovalsReview(ApproveBatchvm approvalProcessvm)
         {
+
             return await _stockServices.ApprovalsReview(approvalProcessvm);
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -1010,13 +1324,24 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("GetItemByClient")]
-        public async Task<StockResponse> GetItemByClient(string ClientName)
+        public async Task<StockResponse> GetItemByClient(string OrderNumber)
         {
            
 
-                return await _stockServices.GetItemByClient(ClientName);
+                return await _stockServices.GetItemByClient(OrderNumber);
             
          
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("GetItemIssuedByClientName")]
+        public async Task<StockResponse> GetFormByStatusIssuedByClient(string ClientName)
+        {
+
+
+            return await _stockServices.GetFormByStatusIssuedByClient(ClientName);
+
+
         }
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
@@ -1024,6 +1349,13 @@ namespace PayhouseDragonFly.API.Controllers.Stock
         public async Task<StockResponse> GetAllItemsReorder()
         {
             return await _stockServices.GetAllItemsReorder();
+        }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("AddReturnedItem")]
+        public async Task<StockResponse> AddReturnedStock(ReturnedStockvm returnedStockvm)
+        {
+            return await _stockServices.AddReturnedStock(returnedStockvm);
         }
     }
 }

@@ -126,11 +126,35 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IStoc
         Task<StockResponse> MarkPOLinesAsComplete(string PONumber);
          Task<StockResponse> GetAllPOSWithStatusPending();
          Task<StockResponse> PODeliveryReview(ApprovalPODeliveryvm pOApprovalvm);
-         Task<StockResponse> GetItemByClient(string ClientName);
+         Task<StockResponse> GetItemByClient(string OrderNumber);
         Task<StockResponse> SearchForPO(string search_query);
          Task<StockResponse> GetPOLinesNByID(int itemId);
        Task<StockResponse> GetProductDetailsByBatchNumber(string BatchNumber);
         Task<StockResponse> GetBatchByPONumber(string poNumber);
         Task<StockResponse> GetAllItemsReorder();
+       Task<StockResponse> GetFormIssuedByID(int Issueid);
+         Task<StockResponse> GetSelectedSerialsByID(int ID);
+        Task<StockResponse> SelectSerialNumber(SelectedSerialvm addBrandvm);
+        Task<StockResponse> GetSelectedSerialsToIssueByID(int ID);
+        Task<StockResponse> GetNameToUse();
+         Task<StockResponse> GetFormByStatusIssuedByClient(string ClientName);
+        Task<StockResponse> AddReturnedStock(ReturnedStockvm returnedStockvm);
+         Task<StockResponse> GetSerialNumberByIssueId(int issueid);
+         Task<StockResponse> GetReturnedDataById(int Id);
+         Task<StockResponse> ReturnReview(ApprovalReturnedStockvm approvalProcessvm);
+        Task<StockResponse> GetAllItemToBeReturned();
+        Task<StockResponse> GetMonthlyRecord(int Year);
+        Task<List<AddDeliveryNote>> GetDeliveredItemsByMonthAndYear(int year, int month);
+        Task<List<SelectSerial>> GetIssuedItemsByMonthandYear(int year, int month);
+       Task<StockResponse> GetSerialByItemId(int ItemId);
+        Task<StockResponse> GetItemByPONumber(string PONumber);
+         Task<StockResponse> GetSerialByItemName(string brandName, string itemName);
+       Task<List<StockAdjustment>> GetDamagedItemsByMonthAndYear(int year, int month);
+        Task<StockResponse> GetSerialByBrandAndItem(string brandName, string itemName);
+        Task<StockResponse> GetAllRequisitionApplicationbyClientName(string clientName);
+        Task<StockResponse> GetCustomerByName(string clientName);
+         Task<StockResponse> GetSelectedSerialsByIssueNo(int issuedNo);
+       Task<StockResponse> GetSerialNumberByBatch(string BatchNumber);
+
     }
 }

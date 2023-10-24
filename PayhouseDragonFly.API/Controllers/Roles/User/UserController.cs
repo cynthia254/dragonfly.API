@@ -519,8 +519,16 @@ namespace PayhouseDragonFly.API.Controllers.User
             return await _userServices.RemoveApprover(userMail);
 
         }
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("RemoveIssuer")]
+        public async Task<BaseResponse> RemoveIssuer(string userMail)
+        {
+            return await _userServices.RemoveIssuer(userMail);
 
         }
+
+    }
 
 
 

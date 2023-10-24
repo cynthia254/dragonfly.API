@@ -45,6 +45,9 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public string CaptureStatus { get; set; } = "Incomplete";
         public int TotalDamages { get; set; }
         public int totalDeliveredForAllItems { get; set; }
+        public int Year { get; set; } = 0;
+        public int Month { get; set; }=0;
+        public int Value { get; set; } = 0;
         //public string Status { get; set; } = "Incomplete";
         //public string Reference_Number { get; set; }
 

@@ -39,6 +39,7 @@ namespace PayhouseDragonFly.CORE.DTOs.RegisterVms
         public string PositionName { get; set; }
         public string PositionDescription { get; set; }
         public bool Checker { get; set; }
+        public bool Issuer { get; set; }
 
 
     }

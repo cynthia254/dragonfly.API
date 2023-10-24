@@ -25,6 +25,7 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public string BatchNumber { get; set; }
         public string ItemStatus { get; set; } = "Okay";
         public int Quantity { get; set; } = 0;
+        public string BatchStatus { get; set; }
 
 
     }

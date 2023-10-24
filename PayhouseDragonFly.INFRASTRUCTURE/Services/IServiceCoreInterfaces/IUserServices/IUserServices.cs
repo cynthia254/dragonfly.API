@@ -49,6 +49,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.IServiceCoreInterfaces.IUser
          Task<BaseResponse> MakeIssuer(string useremail);
         Task<BaseResponse> MakeApprover(string useremail);
         Task<BaseResponse> RemoveApprover(string userMail);
+        Task<BaseResponse> RemoveIssuer(string userMail);
 
 
     }

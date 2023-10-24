@@ -36,5 +36,7 @@ namespace PayhouseDragonFly.CORE.Models.Stock
         public string ItemName { get; set; }
         public string BrandName { get; set; }
         public int totalDeliveredForAllItems { get; set; }
+        //public int ExcessQuantity { get; set; }
+        public int ExcessQuantityInBatch { get; set; }
     }
 }

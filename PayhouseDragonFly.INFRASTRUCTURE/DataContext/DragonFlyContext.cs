@@ -83,5 +83,10 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.DataContext
         public DbSet<ApprovalBatch> ApprovalBatch { get; set; }
         public DbSet<POApproval> POApproval { get; set; }
         public DbSet<ApprovalPODelivery> ApprovalPODelivery { get; set; }
+        public DbSet<OrderNo> OrderNo { get; set; }
+        public DbSet<selectedSetialNumber> selectedSetialNumber { get; set; }
+        public DbSet<ReturnedItem> ReturnedItem { get; set; }
+        public DbSet<ApprovalRetun> ApprovalRetun { get; set; }
+        public DbSet<MonthlyData> MonthlyData { get; set; }
     }
 }

@@ -395,7 +395,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                             PositionName = user.PositionName,
                             PositionDescription = user.PostionDescription,
                             Checker=user.Checker,
-
+                            Issuer=user.Issuer,
 
 
 
@@ -1640,7 +1640,7 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
 
 
 
-                return new BaseResponse("200", $"Successfully made  user {userexsists.FirstName}  {userexsists.LastName} an issuer" , null);
+                return new BaseResponse("200", "Successfully made  selected users issuer" , null);
             }
             catch (Exception ex)
             {
@@ -1720,6 +1720,37 @@ namespace PayhouseDragonFly.INFRASTRUCTURE.Services.ServiceCore.UserServices
                 await _authDbContext.SaveChangesAsync();
 
                 return new BaseResponse("200", "User removed as an approver successfully", null);
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse("190", ex.Message, null);
+            }
+        }
+        public async Task<BaseResponse> RemoveIssuer(string userMail)
+        {
+            try
+            {
+                var userExists = await _userManager.FindByEmailAsync(userMail);
+
+                if (userExists == null)
+                {
+                    return new BaseResponse("190", "User not found", null);
+                }
+
+                // Assuming you have a DbSet for PayhouseDragonFlyUsers in your DbContext
+                var user = await _authDbContext.PayhouseDragonFlyUsers
+                    .Where(u => u.Email == userMail && u.Issuer == true)
+                    .FirstOrDefaultAsync();
+
+                if (user == null)
+                {
+                    return new BaseResponse("150", "User is not an issuer", null);
+                }
+
+                user.Issuer = false; // Set the Checker property to false to remove as approver
+                await _authDbContext.SaveChangesAsync();
+
+                return new BaseResponse("200", "User removed as an issuer successfully", null);
             }
             catch (Exception ex)
             {
